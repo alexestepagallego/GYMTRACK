@@ -1,9 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymTrack | Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0a0a0a; font-family: 'Inter', sans-serif; color: #e0e0e0; margin: 0; overflow-x: hidden; }
+        .bg-card { background-color: #141414; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        input { background-color: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; outline: none; transition: border 0.3s; }
+        input:focus { border-color: #fff; }
+        .fecha-header { cursor: pointer; transition: background 0.2s; }
+        .fecha-contenido { transition: max-height 0.3s ease-out; overflow: hidden; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #ffffff; }
+        input:checked + .slider:before { transform: translateX(22px); background-color: #000; }
+    </style>
+</head>
+<body>
+
+<div id="vista-login" class="min-h-screen flex flex-col justify-center px-8 fade-in hidden">
+    <div class="mb-10 text-center">
+        <h1 class="text-4xl font-black tracking-tighter mb-2 italic">GYM<span class="text-gray-600 font-normal">TRACK</span></h1>
+        <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] font-bold">Cloud Sync Active</p>
+    </div>
+    <div class="space-y-4 max-w-sm mx-auto w-full">
+        <input type="text" id="login-user" placeholder="Usuario" class="w-full">
+        <input type="password" id="login-pass" placeholder="Contraseña" class="w-full">
+        <button onclick="handleAuth()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs tracking-widest mt-4 active:scale-95 transition-all">Entrar / Registrar</button>
+    </div>
+</div>
+
+<div id="app-content" class="hidden">
+    <header class="bg-black/80 backdrop-blur-md text-white h-20 sticky top-0 z-50 flex justify-between items-center px-6 border-b border-white/5">
+        <button id="btn-atras" onclick="history.back()" class="hidden text-[10px] bg-white/5 px-4 py-2 rounded-full border border-white/10 font-black">← VOLVER</button>
+        <h1 id="logo-header" class="text-xl font-black tracking-tighter">GYM<span class="text-gray-500 font-normal">TRACK</span></h1>
+        <div class="flex items-center gap-2">
+            <button onclick="abrirPeso()" class="bg-white/5 p-2 rounded-xl border border-white/10">📊</button>
+            <button onclick="abrirEditorRutina()" class="bg-white/5 p-2 rounded-xl border border-white/10">⚙️</button>
+            <button onclick="logout()" class="ml-2 text-[9px] font-black opacity-30 uppercase">Salir</button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4">
+        <div id="vista-categorias" class="fade-in pb-20">
+            <h2 class="text-3xl font-black my-8 text-white uppercase italic tracking-tighter leading-none">Mi Rutina<br><span id="display-user" class="text-gray-600 text-2xl lowercase font-normal"></span></h2>
+            <div id="contenedor-dias" class="space-y-4"></div>
+        </div>
+        <div id="vista-platos" class="hidden fade-in">
+            <div class="flex justify-between items-center mb-8 pt-4">
+                <h3 id="titulo-dia" class="text-3xl font-black uppercase italic text-white tracking-tighter">DÍA</h3>
+                <button onclick="abrirModalNuevoEjercicio()" class="bg-white text-black text-[10px] px-4 py-2 rounded-full font-black uppercase tracking-widest">+ Añadir</button>
+            </div>
+            <div id="grid-ejercicios" class="space-y-3"></div>
+        </div>
+    </main>
+</div>
+
+<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[110] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
+    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
+        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2>
+        <input type="text" id="input-nombre-ejercicio" placeholder="Ej: Press Militar" class="w-full text-center text-lg font-bold mb-4">
+        <button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button>
+        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4">Cancelar</button>
+    </div>
+</div>
+
+<div id="modal-editar-serie" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
+    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
+        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Serie</h2>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <input type="number" id="edit-peso-val" class="text-center font-bold text-xl">
+            <input type="number" id="edit-reps-val" class="text-center font-bold text-xl">
+        </div>
+        <button onclick="confirmarEdicionSerie()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Guardar</button>
+        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-6">Cancelar</button>
+    </div>
+</div>
+
+<div id="exercise-detail" class="fixed inset-0 z-[90] transform translate-y-full transition-transform duration-500 ease-in-out bg-[#0a0a0a] p-6 overflow-y-auto">
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3"><h2 id="detail-title" class="text-3xl font-black text-white uppercase italic leading-none"></h2><button onclick="abrirGraficaEjercicio()" class="bg-white/10 p-2 rounded-lg border border-white/10 mt-1">📈</button></div>
+        <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
+    </div>
+    <div class="bg-card rounded-[2rem] p-6 border border-white/5 mb-8">
+        <div class="grid grid-cols-2 gap-4"><input type="number" id="input-peso-ejercicio" placeholder="Kg" class="text-xl font-bold"><input type="number" id="input-reps" placeholder="Reps" class="text-xl font-bold"></div>
+        <button onclick="guardarSerie()" class="mt-4 w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs">Registrar Serie</button>
+    </div>
+    <div id="historial-agrupado" class="space-y-3 pb-20"></div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // 2. CONFIGURACIÓN (Tus claves reales)
+    // CONFIGURACIÓN
     const firebaseConfig = {
         apiKey: "AIzaSyBQFAGhldjoZIvMfMCLRYHhRuKG3avMfdU",
         authDomain: "gymtrack-f7f04.firebaseapp.com",
@@ -13,95 +112,58 @@
         appId: "1:156777961615:web:b33258ec8dfe821a8e78fa"
     };
 
-    // 3. INICIALIZACIÓN
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Variables globales
     let currentUserEmail = null;
     let userData = null;
-    let pesoChart = null;
-    let ejercicioChart = null;
-    let ejercicioActualId = null;
-    let serieAEditarId = null;
+    let pesoChart = null, ejercicioChart = null;
+    let ejercicioActualId = null, serieAEditarId = null;
 
-    // --- MANEJO DEL BOTÓN ATRÁS ---
-    window.onpopstate = function(event) {
-        const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie'];
-        modales.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('translate-y-full');
-        });
-        if (!document.getElementById('vista-platos').classList.contains('hidden')) {
-            const algunModalAbierto = modales.some(id => !document.getElementById(id).classList.contains('translate-y-full'));
-            if (!algunModalAbierto) mostrarCategorias();
-        }
-    };
-
-    // --- LÓGICA DE LOGIN ---
+    // AUTH
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
-        const email = user + "@gymtrack.com"; 
-
-        if(!user || pass.length < 6) return alert("Usuario requerido y contraseña de mínimo 6 caracteres");
+        if(!user || pass.length < 6) return alert("Usuario y clave (mín. 6 carac.)");
+        const email = user + "@gymtrack.com";
 
         auth.signInWithEmailAndPassword(email, pass)
             .then(res => initSession(res.user))
             .catch(err => {
                 if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-                    auth.createUserWithEmailAndPassword(email, pass)
-                        .then(res => initSession(res.user))
-                        .catch(e => alert("Error: " + e.message));
-                } else {
-                    alert("Error: " + err.message);
-                }
+                    auth.createUserWithEmailAndPassword(email, pass).then(res => initSession(res.user));
+                } else alert("Error: " + err.message);
             });
     }
 
     async function initSession(user) {
         currentUserEmail = user.email;
         const doc = await db.collection('usuarios').doc(currentUserEmail).get();
-        
-        if(doc.exists) {
-            userData = doc.data();
-        } else {
+        if(doc.exists) userData = doc.data();
+        else {
             userData = {
                 rutina: [
                     { id: 'LUNES', musculo: 'Pecho', activo: true, img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200' },
                     { id: 'MARTES', musculo: 'Espalda', activo: true, img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200' },
                     { id: 'MIÉRCOLES', musculo: 'Pierna', activo: true, img: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200' },
                     { id: 'JUEVES', musculo: 'Hombro', activo: true, img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=200' },
-                    { id: 'VIERNES', musculo: 'Brazos', activo: true, img: 'https://images.unsplash.com/photo-1583454110551-21f2fa2adfcd?w=200' },
-                    { id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
-                    { id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' }
+                    { id: 'VIERNES', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' }
                 ],
-                ejercicios: [],
-                historialPeso: [],
-                pesoObjetivo: 70
+                ejercicios: [], historialPeso: [], pesoObjetivo: 70
             };
             await db.collection('usuarios').doc(currentUserEmail).set(userData);
         }
-        
         document.getElementById('vista-login').classList.add('hidden');
         document.getElementById('app-content').classList.remove('hidden');
         document.getElementById('display-user').innerText = currentUserEmail.split('@')[0];
         renderDashboard();
     }
 
-    async function save() {
-        if(!currentUserEmail) return;
-        try {
-            await db.collection('usuarios').doc(currentUserEmail).update(userData);
-        } catch (e) {
-            console.error("Error al guardar:", e);
-        }
-    }
-
+    async function save() { if(currentUserEmail) await db.collection('usuarios').doc(currentUserEmail).update(userData); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
-    // --- DASHBOARD ---
+    // DASHBOARD & NAV
     function renderDashboard() {
         document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
             <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer">
@@ -123,165 +185,72 @@
     function actualizarListaEjercicios() {
         const filtrados = userData.ejercicios.filter(e => e.dia === document.getElementById('titulo-dia').innerText);
         document.getElementById('grid-ejercicios').innerHTML = filtrados.map(e => `
-            <div onclick="openTracking(${e.id})" class="bg-card p-5 rounded-2xl flex justify-between items-center border border-white/5 active:bg-zinc-900 shadow-md">
-                <div><h4 class="text-white font-black uppercase italic leading-tight">${e.nombre}</h4><p class="text-gray-600 text-[9px] font-black uppercase mt-1">PR: ${getMax(e.series)}kg</p></div>
+            <div onclick="openTracking(${e.id})" class="bg-card p-5 rounded-2xl flex justify-between items-center border border-white/5 active:bg-zinc-900 transition-all">
+                <div><h4 class="text-white font-black uppercase italic">${e.nombre}</h4><p class="text-gray-600 text-[9px] font-black uppercase mt-1">PR: ${getMax(e.series)}kg</p></div>
                 <div class="text-white opacity-20">→</div>
             </div>`).join('') || '<div class="text-center py-20 text-gray-800 font-bold uppercase text-[10px]">Sin ejercicios</div>';
     }
 
     function getMax(series) { return series.length ? Math.max(...series.map(s => parseFloat(s.peso))) : '-'; }
-    function mostrarCategorias() { document.getElementById('vista-categorias').classList.remove('hidden'); document.getElementById('logo-header').classList.remove('hidden'); document.getElementById('vista-platos').classList.add('hidden'); document.getElementById('btn-atras').classList.add('hidden'); renderDashboard(); }
-
-    // --- MODALES ---
-    function abrirModalNuevoEjercicio() {
-        history.pushState({ view: 'modal' }, "");
-        document.getElementById('modal-nuevo-ejercicio').classList.remove('translate-y-full');
-        setTimeout(() => document.getElementById('input-nombre-ejercicio').focus(), 300);
+    function mostrarCategorias() { 
+        document.getElementById('vista-categorias').classList.remove('hidden'); 
+        document.getElementById('logo-header').classList.remove('hidden'); 
+        document.getElementById('vista-platos').classList.add('hidden'); 
+        document.getElementById('btn-atras').classList.add('hidden'); 
     }
+
+    window.onpopstate = function() {
+        const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie'];
+        modales.forEach(id => { if(document.getElementById(id)) document.getElementById(id).classList.add('translate-y-full'); });
+        if (!document.getElementById('vista-platos').classList.contains('hidden')) {
+            const algunModalAbierto = modales.some(id => !document.getElementById(id).classList.contains('translate-y-full'));
+            if (!algunModalAbierto) mostrarCategorias();
+        }
+    };
+
+    // FUNCIONES MODALES
+    function abrirModalNuevoEjercicio() { history.pushState({view:'modal'}, ""); document.getElementById('modal-nuevo-ejercicio').classList.remove('translate-y-full'); }
     function confirmarNuevoEjercicio() {
-        const nombre = document.getElementById('input-nombre-ejercicio').value.trim();
-        if(!nombre) return;
-        userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: nombre, series: [] });
+        const n = document.getElementById('input-nombre-ejercicio').value.trim();
+        if(!n) return;
+        userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: n, series: [] });
         save(); document.getElementById('input-nombre-ejercicio').value = ""; actualizarListaEjercicios(); history.back();
     }
 
-    function openTracking(id) {
-        history.pushState({ view: 'modal' }, "");
-        ejercicioActualId = id;
-        const e = userData.ejercicios.find(x => x.id === id);
-        document.getElementById('detail-title').innerText = e.nombre;
-        actualizarHistorial();
-        document.getElementById('exercise-detail').classList.remove('translate-y-full');
-    }
-
-    function guardarSerie(fechaManual = null) {
-        const p = document.getElementById('input-peso-ejercicio').value;
-        const r = document.getElementById('input-reps').value;
+    function openTracking(id) { history.pushState({view:'modal'}, ""); ejercicioActualId = id; const e = userData.ejercicios.find(x => x.id === id); document.getElementById('detail-title').innerText = e.nombre; actualizarHistorial(); document.getElementById('exercise-detail').classList.remove('translate-y-full'); }
+    function guardarSerie() {
+        const p = document.getElementById('input-peso-ejercicio').value, r = document.getElementById('input-reps').value;
         if(!p || !r) return;
-        const fecha = fechaManual || new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-        userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: fecha });
-        save(); actualizarHistorial();
-        document.getElementById('input-peso-ejercicio').value = '';
-        document.getElementById('input-reps').value = '';
+        userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}) });
+        save(); actualizarHistorial(); document.getElementById('input-peso-ejercicio').value = ''; document.getElementById('input-reps').value = '';
     }
 
     function actualizarHistorial() {
         const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
         const grupos = e.series.reduce((acc, s) => { if (!acc[s.fecha]) acc[s.fecha] = []; acc[s.fecha].push(s); return acc; }, {});
-        const fechas = Object.keys(grupos).reverse();
-        document.getElementById('historial-agrupado').innerHTML = fechas.map((fecha, idx) => `
-            <div class="bg-card rounded-2xl border border-white/5 overflow-hidden shadow-lg">
-                <div onclick="toggleAcordeon('grupo-${idx}')" class="fecha-header p-4 flex justify-between items-center bg-white/5">
-                    <span class="text-[10px] font-black uppercase text-white tracking-widest">${fecha}</span>
-                    <span class="text-[9px] text-gray-500 font-bold">Ver ▼</span>
-                </div>
-                <div id="grupo-${idx}" class="fecha-contenido max-h-0">
-                    <div class="p-4 space-y-2 border-t border-white/5">
-                        ${grupos[fecha].map(s => `
-                            <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl">
-                                <div onclick="abrirModalEditarSerie(${s.id})" class="flex-1 cursor-pointer">
-                                    <span class="text-white font-black">${s.peso}kg × ${s.reps}</span>
-                                    <span class="text-[8px] text-gray-600 block uppercase">Editar</span>
-                                </div>
-                                <button onclick="deleteSerie(${s.id})" class="text-red-900 px-2">🗑️</button>
-                            </div>`).join('')}
-                        <button onclick="addSeriePasada('${fecha}')" class="w-full py-3 mt-2 border border-dashed border-white/10 rounded-xl text-[9px] font-black text-gray-500">+ AÑADIR SERIE</button>
-                    </div>
-                </div>
-            </div>`).join('') || '<p class="text-center text-gray-700 py-10 text-[10px]">Sin historial</p>';
+        document.getElementById('historial-agrupado').innerHTML = Object.keys(grupos).reverse().map((f, i) => `
+            <div class="bg-card rounded-2xl border border-white/5 overflow-hidden">
+                <div onclick="toggleAcordeon('g-${i}')" class="fecha-header p-4 flex justify-between bg-white/5"><span class="text-[10px] font-black uppercase text-white">${f}</span><span class="text-[9px] text-gray-500 font-bold uppercase">Ver ▼</span></div>
+                <div id="g-${i}" class="fecha-contenido max-h-0"><div class="p-4 space-y-2 border-t border-white/5">
+                    ${grupos[f].map(s => `<div class="flex justify-between items-center bg-black/40 p-3 rounded-xl"><div onclick="abrirModalEditarSerie(${s.id})" class="flex-1"><span class="text-white font-black">${s.peso}kg × ${s.reps}</span></div><button onclick="deleteSerie(${s.id})" class="text-red-900 px-2">🗑️</button></div>`).join('')}
+                </div></div>
+            </div>`).join('') || '<p class="text-center text-[10px] py-10">Sin historial</p>';
     }
 
     function toggleAcordeon(id) { const el = document.getElementById(id); el.style.maxHeight = (el.style.maxHeight === '0px' || el.style.maxHeight === '') ? '1000px' : '0px'; }
+    function abrirModalEditarSerie(id) { history.pushState({view:'modal'}, ""); serieAEditarId = id; const s = userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.find(x => x.id === id); document.getElementById('edit-peso-val').value = s.peso; document.getElementById('edit-reps-val').value = s.reps; document.getElementById('modal-editar-serie').classList.remove('translate-y-full'); }
+    function confirmarEdicionSerie() { const s = userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.find(x => x.id === serieAEditarId); s.peso = document.getElementById('edit-peso-val').value; s.reps = document.getElementById('edit-reps-val').value; save(); actualizarHistorial(); actualizarListaEjercicios(); history.back(); }
+    function deleteSerie(id) { if(confirm("¿Borrar?")) { const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); e.series = e.series.filter(s => s.id !== id); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
 
-    function abrirModalEditarSerie(serieId) {
-        history.pushState({ view: 'modal' }, "");
-        serieAEditarId = serieId;
-        const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId);
-        const s = e.series.find(x => x.id === serieId);
-        document.getElementById('edit-peso-val').value = s.peso;
-        document.getElementById('edit-reps-val').value = s.reps;
-        document.getElementById('modal-editar-serie').classList.remove('translate-y-full');
-    }
-
-    function confirmarEdicionSerie() {
-        const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId);
-        const s = e.series.find(x => x.id === serieAEditarId);
-        s.peso = document.getElementById('edit-peso-val').value;
-        s.reps = document.getElementById('edit-reps-val').value;
-        save(); actualizarHistorial(); actualizarListaEjercicios(); history.back();
-    }
-
-    function deleteSerie(serieId) { 
-        if(confirm("¿Borrar?")) { 
-            const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); 
-            e.series = e.series.filter(s => s.id !== serieId); 
-            save(); actualizarHistorial(); actualizarListaEjercicios(); 
-        } 
-    }
-
-    function addSeriePasada(fecha) {
-        const p = prompt("Peso (" + fecha + "):"); const r = prompt("Reps:");
-        if(p && r) { 
-            userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: fecha }); 
-            save(); actualizarHistorial(); actualizarListaEjercicios(); 
-        }
-    }
-
-    // --- GRÁFICAS ---
-    function abrirGraficaEjercicio() {
-        history.pushState({ view: 'modal' }, "");
-        const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
-        document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full');
-        setTimeout(() => {
-            const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d');
-            const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {});
-            if (ejercicioChart) ejercicioChart.destroy();
-            ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } });
-        }, 100);
-    }
-
-    function abrirPeso() {
-        history.pushState({ view: 'modal' }, "");
-        document.getElementById('modal-peso').classList.remove('translate-y-full');
-        setTimeout(() => {
-            const ctx = document.getElementById('chartPeso').getContext('2d');
-            if(pesoChart) pesoChart.destroy();
-            pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } });
-        }, 100);
-    }
-
-    function registrarPesoHoy() {
-        const p = parseFloat(document.getElementById('input-peso-actual').value);
-        if(!p) return;
-        userData.historialPeso.push({ fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}), valor: p });
-        save(); abrirPeso();
-    }
-
-    function abrirEditorRutina() {
-        history.pushState({ view: 'modal' }, "");
-        document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `
-            <div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5">
-                <div class="flex justify-between items-center"><span class="font-black text-white italic text-sm">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div>
-                <input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none">
-            </div>`).join('');
-        document.getElementById('modal-rutina').classList.remove('translate-y-full');
-    }
-
-    function guardarConfiguracionRutina() {
-        userData.rutina.forEach((dia, index) => { 
-            dia.activo = document.getElementById(`check-${index}`).checked; 
-            dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; 
-        });
-        save(); history.back();
-    }
-
-    // --- INICIO DE SESIÓN ---
     auth.onAuthStateChanged(user => {
-        if (user) {
-            initSession(user);
-        } else {
-            document.getElementById('vista-login').classList.remove('hidden');
-            document.getElementById('app-content').classList.add('hidden');
-        }
+        if (user) initSession(user);
+        else document.getElementById('vista-login').classList.remove('hidden');
     });
 </script>
+
+<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black"></div>
+<div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black"></div>
+<div id="modal-grafica-ejercicio" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black"></div>
+
+</body>
+</html>
