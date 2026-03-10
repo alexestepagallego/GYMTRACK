@@ -150,21 +150,43 @@
         }
     };
 
-    // --- AUTH ---
-    function handleAuth() {
-        const u = document.getElementById('login-user').value.trim().toLowerCase();
-        const p = document.getElementById('login-pass').value.trim();
-        if(!u || p.length < 6) return alert("Mínimo 6 caracteres en la clave");
-        const email = u + "@gymtrack.com";
-
-        auth.signInWithEmailAndPassword(email, p)
-            .then(res => initSession(res.user))
-            .catch(err => {
-                if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-                    auth.createUserWithEmailAndPassword(email, p).then(res => initSession(res.user));
-                } else alert("Error: " + err.message);
-            });
+   // --- LÓGICA DE AUTH CORREGIDA ---
+function handleAuth() {
+    const user = document.getElementById('login-user').value.trim().toLowerCase();
+    const pass = document.getElementById('login-pass').value.trim();
+    
+    if(!user || pass.length < 6) {
+        return alert("Por favor, introduce un usuario y una contraseña de al menos 6 caracteres.");
     }
+
+    const email = user + "@gymtrack.com";
+
+    // 1. Intentamos iniciar sesión
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(res => {
+            console.log("Login correcto");
+            initSession(res.user);
+        })
+        .catch(err => {
+            // 2. Si falla el login (por el motivo que sea), intentamos registrar al usuario
+            console.log("Fallo login, intentando registro...");
+            
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then(res => {
+                    console.log("Usuario creado con éxito");
+                    initSession(res.user);
+                })
+                .catch(regErr => {
+                    // 3. Si el registro falla porque el usuario YA EXISTE, 
+                    // significa que la contraseña del login era la que estaba mal.
+                    if (regErr.code === 'auth/email-already-in-use') {
+                        alert("Contraseña incorrecta para este usuario.");
+                    } else {
+                        alert("Error: " + regErr.message);
+                    }
+                });
+        });
+}
 
     async function initSession(user) {
         currentUserEmail = user.email;
