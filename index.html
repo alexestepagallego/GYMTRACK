@@ -3,7 +3,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // 2. Tu configuración de Firebase
+    // 2. CONFIGURACIÓN (Tus claves reales)
     const firebaseConfig = {
         apiKey: "AIzaSyBQFAGhldjoZIvMfMCLRYHhRuKG3avMfdU",
         authDomain: "gymtrack-f7f04.firebaseapp.com",
@@ -13,12 +13,12 @@
         appId: "1:156777961615:web:b33258ec8dfe821a8e78fa"
     };
 
-    // 3. Inicializar Firebase
+    // 3. INICIALIZACIÓN
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 4. Variables Globales (Sin duplicados)
+    // Variables globales
     let currentUserEmail = null;
     let userData = null;
     let pesoChart = null;
@@ -26,26 +26,20 @@
     let ejercicioActualId = null;
     let serieAEditarId = null;
 
-    // --- MANEJO DEL BOTÓN ATRÁS (Navegación) ---
+    // --- MANEJO DEL BOTÓN ATRÁS ---
     window.onpopstate = function(event) {
-        const modales = [
-            'modal-rutina', 'modal-peso', 'exercise-detail', 
-            'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie'
-        ];
+        const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie'];
         modales.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('translate-y-full');
         });
-        
-        const vistaPlatos = document.getElementById('vista-platos');
-        if (vistaPlatos && !vistaPlatos.classList.contains('hidden')) {
-            // Si no hay modales abiertos pero estamos en platos, volver a categorías
+        if (!document.getElementById('vista-platos').classList.contains('hidden')) {
             const algunModalAbierto = modales.some(id => !document.getElementById(id).classList.contains('translate-y-full'));
             if (!algunModalAbierto) mostrarCategorias();
         }
     };
 
-    // --- LÓGICA DE AUTH CON FIREBASE ---
+    // --- LÓGICA DE LOGIN ---
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
@@ -56,11 +50,10 @@
         auth.signInWithEmailAndPassword(email, pass)
             .then(res => initSession(res.user))
             .catch(err => {
-                if(err.code === 'auth/user-not-found') {
-                    // Si el usuario no existe, lo registramos automáticamente
+                if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
                     auth.createUserWithEmailAndPassword(email, pass)
                         .then(res => initSession(res.user))
-                        .catch(e => alert("Error al crear cuenta: " + e.message));
+                        .catch(e => alert("Error: " + e.message));
                 } else {
                     alert("Error: " + err.message);
                 }
@@ -74,7 +67,6 @@
         if(doc.exists) {
             userData = doc.data();
         } else {
-            // Rutina por defecto para nuevos usuarios
             userData = {
                 rutina: [
                     { id: 'LUNES', musculo: 'Pecho', activo: true, img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200' },
@@ -98,29 +90,23 @@
         renderDashboard();
     }
 
-    // --- GUARDADO EN CLOUD ---
     async function save() {
         if(!currentUserEmail) return;
-        await db.collection('usuarios').doc(currentUserEmail).update(userData);
+        try {
+            await db.collection('usuarios').doc(currentUserEmail).update(userData);
+        } catch (e) {
+            console.error("Error al guardar:", e);
+        }
     }
 
-    function logout() {
-        auth.signOut().then(() => {
-            localStorage.removeItem('gym_user_v4');
-            location.reload();
-        });
-    }
+    function logout() { auth.signOut().then(() => location.reload()); }
 
-    // --- RENDERIZADO Y LOGICA DE RUTINA ---
+    // --- DASHBOARD ---
     function renderDashboard() {
-        const container = document.getElementById('contenedor-dias');
-        container.innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
+        document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
             <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer">
                 <img src="${dia.img}" class="absolute inset-0 w-full h-full object-cover opacity-10">
-                <div class="absolute inset-0 p-5 flex flex-col justify-end">
-                    <span class="text-white text-xl font-black uppercase italic">${dia.id}</span>
-                    <span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1">${dia.musculo}</span>
-                </div>
+                <div class="absolute inset-0 p-5 flex flex-col justify-end"><span class="text-white text-xl font-black uppercase italic">${dia.id}</span><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1">${dia.musculo}</span></div>
             </div>`).join('');
     }
 
@@ -137,7 +123,7 @@
     function actualizarListaEjercicios() {
         const filtrados = userData.ejercicios.filter(e => e.dia === document.getElementById('titulo-dia').innerText);
         document.getElementById('grid-ejercicios').innerHTML = filtrados.map(e => `
-            <div onclick="openTracking(${e.id})" class="bg-card p-5 rounded-2xl flex justify-between items-center border border-white/5 active:bg-zinc-900 transition-all shadow-md">
+            <div onclick="openTracking(${e.id})" class="bg-card p-5 rounded-2xl flex justify-between items-center border border-white/5 active:bg-zinc-900 shadow-md">
                 <div><h4 class="text-white font-black uppercase italic leading-tight">${e.nombre}</h4><p class="text-gray-600 text-[9px] font-black uppercase mt-1">PR: ${getMax(e.series)}kg</p></div>
                 <div class="text-white opacity-20">→</div>
             </div>`).join('') || '<div class="text-center py-20 text-gray-800 font-bold uppercase text-[10px]">Sin ejercicios</div>';
@@ -152,15 +138,11 @@
         document.getElementById('modal-nuevo-ejercicio').classList.remove('translate-y-full');
         setTimeout(() => document.getElementById('input-nombre-ejercicio').focus(), 300);
     }
-    
     function confirmarNuevoEjercicio() {
         const nombre = document.getElementById('input-nombre-ejercicio').value.trim();
         if(!nombre) return;
         userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: nombre, series: [] });
-        save(); 
-        document.getElementById('input-nombre-ejercicio').value = ""; 
-        actualizarListaEjercicios(); 
-        history.back();
+        save(); document.getElementById('input-nombre-ejercicio').value = ""; actualizarListaEjercicios(); history.back();
     }
 
     function openTracking(id) {
@@ -178,8 +160,7 @@
         if(!p || !r) return;
         const fecha = fechaManual || new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
         userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: fecha });
-        save(); 
-        actualizarHistorial();
+        save(); actualizarHistorial();
         document.getElementById('input-peso-ejercicio').value = '';
         document.getElementById('input-reps').value = '';
     }
@@ -189,10 +170,10 @@
         const grupos = e.series.reduce((acc, s) => { if (!acc[s.fecha]) acc[s.fecha] = []; acc[s.fecha].push(s); return acc; }, {});
         const fechas = Object.keys(grupos).reverse();
         document.getElementById('historial-agrupado').innerHTML = fechas.map((fecha, idx) => `
-            <div class="bg-card rounded-2xl border border-white/5 overflow-hidden">
+            <div class="bg-card rounded-2xl border border-white/5 overflow-hidden shadow-lg">
                 <div onclick="toggleAcordeon('grupo-${idx}')" class="fecha-header p-4 flex justify-between items-center bg-white/5">
                     <span class="text-[10px] font-black uppercase text-white tracking-widest">${fecha}</span>
-                    <span class="text-[9px] text-gray-500 font-bold uppercase">Detalles ▼</span>
+                    <span class="text-[9px] text-gray-500 font-bold">Ver ▼</span>
                 </div>
                 <div id="grupo-${idx}" class="fecha-contenido max-h-0">
                     <div class="p-4 space-y-2 border-t border-white/5">
@@ -200,20 +181,17 @@
                             <div class="flex justify-between items-center bg-black/40 p-3 rounded-xl">
                                 <div onclick="abrirModalEditarSerie(${s.id})" class="flex-1 cursor-pointer">
                                     <span class="text-white font-black">${s.peso}kg × ${s.reps}</span>
-                                    <span class="text-[8px] text-gray-600 block font-bold uppercase tracking-widest">Editar</span>
+                                    <span class="text-[8px] text-gray-600 block uppercase">Editar</span>
                                 </div>
                                 <button onclick="deleteSerie(${s.id})" class="text-red-900 px-2">🗑️</button>
                             </div>`).join('')}
-                        <button onclick="addSeriePasada('${fecha}')" class="w-full py-3 mt-2 border border-dashed border-white/10 rounded-xl text-[9px] font-black text-gray-500 uppercase">+ Añadir a este día</button>
+                        <button onclick="addSeriePasada('${fecha}')" class="w-full py-3 mt-2 border border-dashed border-white/10 rounded-xl text-[9px] font-black text-gray-500">+ AÑADIR SERIE</button>
                     </div>
                 </div>
-            </div>`).join('') || '<p class="text-center text-gray-800 py-10 text-[10px]">Historial vacío</p>';
+            </div>`).join('') || '<p class="text-center text-gray-700 py-10 text-[10px]">Sin historial</p>';
     }
 
-    function toggleAcordeon(id) { 
-        const el = document.getElementById(id); 
-        el.style.maxHeight = (el.style.maxHeight === '0px' || el.style.maxHeight === '') ? '1000px' : '0px'; 
-    }
+    function toggleAcordeon(id) { const el = document.getElementById(id); el.style.maxHeight = (el.style.maxHeight === '0px' || el.style.maxHeight === '') ? '1000px' : '0px'; }
 
     function abrirModalEditarSerie(serieId) {
         history.pushState({ view: 'modal' }, "");
@@ -230,34 +208,26 @@
         const s = e.series.find(x => x.id === serieAEditarId);
         s.peso = document.getElementById('edit-peso-val').value;
         s.reps = document.getElementById('edit-reps-val').value;
-        save();
-        actualizarHistorial();
-        actualizarListaEjercicios();
-        history.back();
+        save(); actualizarHistorial(); actualizarListaEjercicios(); history.back();
     }
 
     function deleteSerie(serieId) { 
-        if(confirm("¿Borrar serie?")) { 
+        if(confirm("¿Borrar?")) { 
             const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); 
             e.series = e.series.filter(s => s.id !== serieId); 
-            save(); 
-            actualizarHistorial(); 
-            actualizarListaEjercicios(); 
+            save(); actualizarHistorial(); actualizarListaEjercicios(); 
         } 
     }
 
     function addSeriePasada(fecha) {
-        const p = prompt("Peso (" + fecha + "):"); 
-        const r = prompt("Reps:");
+        const p = prompt("Peso (" + fecha + "):"); const r = prompt("Reps:");
         if(p && r) { 
             userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: fecha }); 
-            save(); 
-            actualizarHistorial(); 
-            actualizarListaEjercicios(); 
+            save(); actualizarHistorial(); actualizarListaEjercicios(); 
         }
     }
 
-    // --- GRAFICAS ---
+    // --- GRÁFICAS ---
     function abrirGraficaEjercicio() {
         history.pushState({ view: 'modal' }, "");
         const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
@@ -302,11 +272,10 @@
             dia.activo = document.getElementById(`check-${index}`).checked; 
             dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; 
         });
-        save(); 
-        history.back();
+        save(); history.back();
     }
 
-    // --- PERSISTENCIA DE SESION ---
+    // --- INICIO DE SESIÓN ---
     auth.onAuthStateChanged(user => {
         if (user) {
             initSession(user);
@@ -315,5 +284,4 @@
             document.getElementById('app-content').classList.add('hidden');
         }
     });
-
 </script>
