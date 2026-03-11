@@ -160,38 +160,26 @@
             const el = document.getElementById(id);
             if (el) el.classList.add('translate-y-full');
         });
-
         if (!event.state) mostrarCategorias();
     };
 
-    // --- AUTH INTELIGENTE (Soluciona el error del login) ---
+    // --- AUTH LOGIN/REGISTRO ---
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
         
-        if(!user || pass.length < 6) {
-            return alert("Por favor, introduce un usuario y una contraseña de al menos 6 caracteres.");
-        }
+        if(!user || pass.length < 6) return alert("Por favor, introduce un usuario y una contraseña de al menos 6 caracteres.");
 
         const email = user + "@gymtrack.com";
 
         auth.signInWithEmailAndPassword(email, pass)
-            .then(res => {
-                initSession(res.user);
-            })
+            .then(res => initSession(res.user))
             .catch(err => {
-                // Si falla, intentamos registrarlo
                 auth.createUserWithEmailAndPassword(email, pass)
-                    .then(res => {
-                        initSession(res.user);
-                    })
-                    .catch(regErr => {
-                        // Si da error de email en uso, significa que la contraseña estaba mal
-                        if (regErr.code === 'auth/email-already-in-use') {
-                            alert("Contraseña incorrecta para este usuario.");
-                        } else {
-                            alert("Error: " + regErr.message);
-                        }
+                    .then(res => initSession(res.user))
+                    .catch(e => {
+                        if(e.code === 'auth/email-already-in-use') alert("Contraseña incorrecta para este usuario.");
+                        else alert("Error: " + e.message);
                     });
             });
     }
@@ -199,17 +187,30 @@
     async function initSession(user) {
         try {
             currentUserEmail = user.email;
+            document.getElementById('loading-screen').classList.remove('hidden');
             const doc = await db.collection('usuarios').doc(currentUserEmail).get();
             
-            if(doc.exists) userData = doc.data();
+            if(doc.exists) {
+                userData = doc.data();
+                
+                // --- PARCHE AUTOMÁTICO: Añadir Sábado y Domingo si no existen ---
+                if (!userData.rutina.find(d => d.id === 'SÁBADO')) {
+                    userData.rutina.push({ id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
+                    userData.rutina.push({ id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
+                    save(); // Lo guardamos en la nube para arreglarlo permanentemente
+                }
+            }
             else {
+                // Nuevo usuario
                 userData = {
                     rutina: [
                         { id: 'LUNES', musculo: 'Pecho', activo: true, img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200' },
                         { id: 'MARTES', musculo: 'Espalda', activo: true, img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200' },
                         { id: 'MIÉRCOLES', musculo: 'Pierna', activo: true, img: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200' },
                         { id: 'JUEVES', musculo: 'Hombro', activo: true, img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=200' },
-                        { id: 'VIERNES', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' }
+                        { id: 'VIERNES', musculo: 'Brazos', activo: true, img: 'https://images.unsplash.com/photo-1583454110551-21f2fa2adfcd?w=200' },
+                        { id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
+                        { id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' }
                     ],
                     ejercicios: [], historialPeso: [], pesoObjetivo: 70
                 };
@@ -235,7 +236,7 @@
     // --- DASHBOARD Y LISTA ---
     function renderDashboard() {
         document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
-            <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer">
+            <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer shadow-lg">
                 <img src="${dia.img}" class="absolute inset-0 w-full h-full object-cover opacity-10">
                 <div class="absolute inset-0 p-5 flex flex-col justify-end"><span class="text-white text-xl font-black uppercase italic">${dia.id}</span><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1">${dia.musculo}</span></div>
             </div>`).join('');
@@ -272,7 +273,7 @@
         renderDashboard(); 
     }
 
-    // --- OPCIONES DE EJERCICIO (Editar/Borrar) ---
+    // --- OPCIONES DE EJERCICIO ---
     function abrirOpcionesEjercicio(id) {
         history.pushState({ view: 'modal' }, "");
         ejercicioAEditarId = id;
@@ -339,7 +340,7 @@
     function deleteSerie(id) { if(confirm("¿Borrar?")) { const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); e.series = e.series.filter(s => s.id !== id); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
     function addSeriePasada(f) { const p = prompt("Peso ("+f+"):"), r = prompt("Reps:"); if(p && r) { userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: f }); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
 
-    // --- GRÁFICAS Y OTROS ---
+    // --- GRÁFICAS, RUTINA Y PESO ---
     function abrirGraficaEjercicio() {
         history.pushState({v:'m'}, "");
         const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
