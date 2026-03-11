@@ -50,9 +50,7 @@
             <button id="btn-save-template" onclick="guardarComoPlantilla()" class="hidden bg-green-600/20 text-green-500 p-2 rounded-xl border border-green-600/50 font-black text-[9px] tracking-widest uppercase">💾 GUARDAR PLANTILLA</button>
             <button id="btn-admin-volver" onclick="volverPanelAdmin()" class="hidden bg-yellow-600/20 text-yellow-500 p-2 rounded-xl border border-yellow-600/50 font-black text-[9px] tracking-widest uppercase">👑 PANEL</button>
             
-            <button id="btn-peso" onclick="abrirPeso()" class="bg-white/5 p-2 rounded-xl border border-white/10">📊</button>
-            <button id="btn-ajustes" onclick="abrirEditorRutina()" class="bg-white/5 p-2 rounded-xl border border-white/10">⚙️</button>
-            <button onclick="logout()" class="ml-2 text-[9px] font-black opacity-30 uppercase">Salir</button>
+            <button onclick="logout()" class="text-[9px] font-black opacity-50 uppercase border border-white/10 px-3 py-2 rounded-xl active:bg-white/5 transition-all">Salir</button>
         </div>
     </header>
 
@@ -89,8 +87,8 @@
         </div>
     </main>
 
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 z-40 hidden h-20 px-6 pb-safe">
-        <div class="max-w-md mx-auto flex justify-between items-center h-full gap-2">
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 z-40 hidden h-20 px-2 pb-safe">
+        <div class="max-w-md mx-auto flex justify-between items-center h-full gap-1">
             
             <button onclick="cambiarTab('entreno')" id="tab-entreno" class="flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105">
                 <span class="text-2xl mb-1 drop-shadow-md">🏋️</span>
@@ -100,6 +98,16 @@
             <button onclick="cambiarTab('nutricion')" id="tab-nutricion" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
                 <span class="text-2xl mb-1">🍎</span>
                 <span class="text-[9px] font-black uppercase tracking-widest">Nutrición</span>
+            </button>
+
+            <button onclick="abrirPeso()" id="tab-peso" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
+                <span class="text-2xl mb-1">📊</span>
+                <span class="text-[9px] font-black uppercase tracking-widest">Peso</span>
+            </button>
+
+            <button onclick="abrirEditorRutina()" id="tab-ajustes" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
+                <span class="text-2xl mb-1">⚙️</span>
+                <span class="text-[9px] font-black uppercase tracking-widest">Ajustes</span>
             </button>
 
         </div>
@@ -230,19 +238,18 @@
         const tEntreno = document.getElementById('tab-entreno');
         const tNutricion = document.getElementById('tab-nutricion');
 
-        // Reset visual
         tEntreno.className = "flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100";
         tNutricion.className = "flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100";
 
         if (tab === 'entreno') {
             tEntreno.className = "flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105";
             document.getElementById('vista-nutricion').classList.add('hidden');
-            mostrarCategorias(); // Vuelve a la pantalla principal de entreno
+            mostrarCategorias(); 
         } else if (tab === 'nutricion') {
             tNutricion.className = "flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105";
             document.getElementById('vista-categorias').classList.add('hidden');
             document.getElementById('vista-platos').classList.add('hidden');
-            document.getElementById('btn-atras').classList.add('hidden'); // Ocultar botón atrás si estaba
+            document.getElementById('btn-atras').classList.add('hidden'); 
             document.getElementById('vista-nutricion').classList.remove('hidden');
         }
     }
@@ -356,10 +363,7 @@
         
         document.getElementById('btn-admin-volver').classList.add('hidden'); 
         document.getElementById('btn-save-template').classList.add('hidden'); 
-        document.getElementById('btn-peso').classList.add('hidden'); 
-        document.getElementById('btn-ajustes').classList.add('hidden'); 
         
-        // Esconder el menú inferior en el panel de admin
         document.getElementById('bottom-nav').classList.add('hidden');
     }
 
@@ -380,11 +384,8 @@
             document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('vista-login').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); 
             
             document.getElementById('vista-admin').classList.add('hidden'); 
-            document.getElementById('btn-peso').classList.remove('hidden'); 
-            document.getElementById('btn-ajustes').classList.remove('hidden'); 
             document.getElementById('display-user').innerText = currentUserEmail.split('@')[0]; 
             
-            // Mostrar menú inferior y asegurar que entramos en la tab de entreno
             document.getElementById('bottom-nav').classList.remove('hidden');
             cambiarTab('entreno');
         } catch (error) { alert("Error de conexión"); document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
