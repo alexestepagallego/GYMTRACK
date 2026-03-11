@@ -114,17 +114,18 @@
     <div id="historial-agrupado" class="space-y-3 pb-20"></div>
 </div>
 
-<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black overflow-y-auto">
-    <div class="p-6">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black text-white uppercase italic">Rutina</h2>
-            <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
-        </div>
-        
-        <div id="lista-edicion-dias" class="space-y-3"></div>
-        
-        <div class="h-32"></div>
+<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-black text-white uppercase italic">Rutina</h2>
+        <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
     </div>
+    
+    <div id="lista-edicion-dias" class="space-y-3 mb-8"></div>
+    
+    <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl mb-12 active:scale-95 transition-transform">
+        Guardar Cambios
+    </button>
+</div>
     
     <div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none flex items-end h-32">
         <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl pointer-events-auto active:scale-95 transition-transform">
