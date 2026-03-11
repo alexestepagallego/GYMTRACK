@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymTrack | Elite</title>
+    <title>GymTrack | Elite Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input { background-color: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; outline: none; transition: border 0.3s; }
         input:focus { border-color: #fff; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .fecha-header { cursor: pointer; transition: background 0.2s; }
         .fecha-contenido { transition: max-height 0.3s ease-out; overflow: hidden; }
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
@@ -36,8 +37,8 @@
         <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] font-bold">Cloud Sync Active</p>
     </div>
     <div class="space-y-4 max-w-sm mx-auto w-full">
-        <input type="text" id="login-user" placeholder="Usuario" class="w-full">
-        <input type="password" id="login-pass" placeholder="Contraseña" class="w-full">
+        <input type="text" id="login-user" placeholder="Usuario" class="w-full text-center">
+        <input type="password" id="login-pass" placeholder="Contraseña" class="w-full text-center">
         <button onclick="handleAuth()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs tracking-widest mt-4 active:scale-95 transition-all">Entrar</button>
     </div>
 </div>
@@ -46,18 +47,27 @@
     <header class="bg-black/80 backdrop-blur-md text-white h-20 sticky top-0 z-50 flex justify-between items-center px-6 border-b border-white/5">
         <button id="btn-atras" onclick="history.back()" class="hidden text-[10px] bg-white/5 px-4 py-2 rounded-full border border-white/10 font-black">← VOLVER</button>
         <h1 id="logo-header" class="text-xl font-black tracking-tighter">GYM<span class="text-gray-500 font-normal">TRACK</span></h1>
+        
         <div class="flex items-center gap-2">
-            <button onclick="abrirPeso()" class="bg-white/5 p-2 rounded-xl border border-white/10">📊</button>
-            <button onclick="abrirEditorRutina()" class="bg-white/5 p-2 rounded-xl border border-white/10">⚙️</button>
+            <button id="btn-admin-volver" onclick="volverPanelAdmin()" class="hidden bg-yellow-600/20 text-yellow-500 p-2 rounded-xl border border-yellow-600/50 font-black text-[9px] tracking-widest uppercase">👑 PANEL</button>
+            
+            <button id="btn-peso" onclick="abrirPeso()" class="bg-white/5 p-2 rounded-xl border border-white/10">📊</button>
+            <button id="btn-ajustes" onclick="abrirEditorRutina()" class="bg-white/5 p-2 rounded-xl border border-white/10">⚙️</button>
             <button onclick="logout()" class="ml-2 text-[9px] font-black opacity-30 uppercase">Salir</button>
         </div>
     </header>
 
     <main class="max-w-md mx-auto p-4">
-        <div id="vista-categorias" class="fade-in pb-20">
+        <div id="vista-admin" class="hidden fade-in pb-20">
+            <h2 class="text-3xl font-black my-8 text-white uppercase italic tracking-tighter leading-none text-yellow-500">Panel Admin<br><span class="text-gray-600 text-lg font-normal tracking-normal normal-case">Gestión de usuarios</span></h2>
+            <div id="lista-usuarios-admin" class="space-y-3"></div>
+        </div>
+
+        <div id="vista-categorias" class="hidden fade-in pb-20">
             <h2 class="text-3xl font-black my-8 text-white uppercase italic tracking-tighter leading-none">Mi Rutina<br><span id="display-user" class="text-gray-600 text-2xl lowercase font-normal"></span></h2>
             <div id="contenedor-dias" class="space-y-4"></div>
         </div>
+
         <div id="vista-platos" class="hidden fade-in">
             <div class="flex justify-between items-center mb-8 pt-4">
                 <h3 id="titulo-dia" class="text-3xl font-black uppercase italic text-white tracking-tighter">DÍA</h3>
@@ -68,81 +78,23 @@
     </main>
 </div>
 
-<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[110] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
-    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
-        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2>
-        <input type="text" id="input-nombre-ejercicio" placeholder="Ej: Press Militar" class="w-full text-center text-lg font-bold mb-4">
-        <button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button>
-        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4 text-center">Cancelar</button>
-    </div>
-</div>
+<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2><input type="text" id="input-nombre-ejercicio" placeholder="Ej: Press Militar" class="w-full text-center text-lg font-bold mb-4"><button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4 text-center">Cancelar</button></div></div>
+<div id="modal-opciones-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Opciones</h2><input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-6 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]"><button onclick="guardarNombreEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Nombre</button><button onclick="eliminarEjercicio()" class="w-full bg-red-900/80 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Eliminar Ejercicio</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-2 text-center">Cancelar</button></div></div>
 
-<div id="modal-opciones-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
-    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
-        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Opciones</h2>
-        <input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-6 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]">
-        <button onclick="guardarNombreEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Nombre</button>
-        <button onclick="eliminarEjercicio()" class="w-full bg-red-900/80 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Eliminar Ejercicio</button>
-        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-2 text-center">Cancelar</button>
-    </div>
-</div>
+<div id="modal-editar-serie" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Serie</h2><div class="grid grid-cols-2 gap-4 mb-6"><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="edit-peso-val" class="text-center font-bold text-xl"></div><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repes</label><input type="number" id="edit-reps-val" class="text-center font-bold text-xl"></div></div><button onclick="confirmarEdicionSerie()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Guardar</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-6 text-center">Cancelar</button></div></div>
 
-<div id="modal-editar-serie" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
-    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
-        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Serie</h2>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="edit-peso-val" class="text-center font-bold text-xl"></div>
-            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repes</label><input type="number" id="edit-reps-val" class="text-center font-bold text-xl"></div>
-        </div>
-        <button onclick="confirmarEdicionSerie()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Guardar</button>
-        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-6 text-center">Cancelar</button>
-    </div>
-</div>
+<div id="exercise-detail" class="fixed inset-0 z-[90] transform translate-y-full transition-transform duration-500 ease-in-out bg-[#0a0a0a] p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><div class="flex items-center gap-3"><h2 id="detail-title" class="text-3xl font-black text-white uppercase italic leading-none"></h2><button onclick="abrirGraficaEjercicio()" class="bg-white/10 p-2 rounded-lg border border-white/10 mt-1">📈</button></div><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div class="bg-card rounded-[2rem] p-6 border border-white/5 mb-8"><div class="grid grid-cols-2 gap-4"><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="input-peso-ejercicio" placeholder="0" class="text-xl font-bold text-center"></div><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repeticiones</label><input type="number" id="input-reps" placeholder="0" class="text-xl font-bold text-center"></div></div><button onclick="guardarSerie()" class="mt-4 w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs">Registrar Serie</button></div><div id="historial-agrupado" class="space-y-3 pb-20"></div></div>
 
-<div id="exercise-detail" class="fixed inset-0 z-[90] transform translate-y-full transition-transform duration-500 ease-in-out bg-[#0a0a0a] p-6 overflow-y-auto">
-    <div class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-3"><h2 id="detail-title" class="text-3xl font-black text-white uppercase italic leading-none"></h2><button onclick="abrirGraficaEjercicio()" class="bg-white/10 p-2 rounded-lg border border-white/10 mt-1">📈</button></div>
-        <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
-    </div>
-    <div class="bg-card rounded-[2rem] p-6 border border-white/5 mb-8">
-        <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="input-peso-ejercicio" placeholder="0" class="text-xl font-bold"></div>
-            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repeticiones</label><input type="number" id="input-reps" placeholder="0" class="text-xl font-bold"></div>
-        </div>
-        <button onclick="guardarSerie()" class="mt-4 w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs">Registrar Serie</button>
-    </div>
-    <div id="historial-agrupado" class="space-y-3 pb-20"></div>
-</div>
-
-<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-black text-white uppercase italic font-black">Rutina</h2>
-        <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
-    </div>
-    
-    <div id="lista-edicion-dias" class="space-y-3 mb-8"></div>
-    
-    <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">
-        Guardar Cambios
-    </button>
-</div>
-
-<div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
-    <div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic">Peso</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div>
-    <div class="bg-card p-4 rounded-[2rem] border border-white/5 mb-6"><canvas id="chartPeso"></canvas></div>
-    <div class="bg-card p-6 rounded-[2rem] border border-white/5"><div class="flex gap-2"><input type="number" id="input-peso-actual" step="0.1" class="flex-1 text-xl font-bold" placeholder="Kg hoy"><button onclick="registrarPesoHoy()" class="bg-white text-black px-6 rounded-xl font-black text-xs uppercase">OK</button></div></div>
-</div>
-
-<div id="modal-grafica-ejercicio" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6">
-    <div class="flex justify-between items-center mb-10"><h2 class="text-2xl font-black text-white uppercase italic">Evolución</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full font-bold">✕</button></div>
-    <div class="bg-card p-6 rounded-[2.5rem] border border-white/5 shadow-2xl"><canvas id="chartEjercicioIndividual"></canvas></div>
-</div>
+<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic font-black">Rutina</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div id="lista-edicion-dias" class="space-y-3 mb-8"></div><button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">Guardar Cambios</button></div>
+<div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic">Peso</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div class="bg-card p-4 rounded-[2rem] border border-white/5 mb-6"><canvas id="chartPeso"></canvas></div><div class="bg-card p-6 rounded-[2rem] border border-white/5"><div class="flex gap-2"><input type="number" id="input-peso-actual" step="0.1" class="flex-1 text-xl font-bold text-center" placeholder="Kg hoy"><button onclick="registrarPesoHoy()" class="bg-white text-black px-6 rounded-xl font-black text-xs uppercase">OK</button></div></div></div>
+<div id="modal-grafica-ejercicio" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6"><div class="flex justify-between items-center mb-10"><h2 class="text-2xl font-black text-white uppercase italic">Evolución</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full font-bold">✕</button></div><div class="bg-card p-6 rounded-[2.5rem] border border-white/5 shadow-2xl"><canvas id="chartEjercicioIndividual"></canvas></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
+    // 1. CONFIGURACIÓN FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyBQFAGhldjoZIvMfMCLRYHhRuKG3avMfdU",
         authDomain: "gymtrack-f7f04.firebaseapp.com",
@@ -156,18 +108,32 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUserEmail = null, userData = null;
+    const ADMIN_EMAIL = "admin@gymtrack.com";
+    let loggedInEmail = null; // El que ha iniciado sesión
+    let currentUserEmail = null; // El perfil que estamos editando/viendo
+    let userData = null;
+    
     let pesoChart = null, ejercicioChart = null, ejercicioActualId = null, serieAEditarId = null, ejercicioAEditarId = null;
 
+    // --- NAVEGACIÓN INTELIGENTE ---
     window.onpopstate = function(event) {
         const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie', 'modal-opciones-ejercicio'];
         modales.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('translate-y-full');
         });
-        if (!event.state) mostrarCategorias();
+
+        if (!event.state) {
+            // Si le damos atrás del todo, volvemos a la vista principal correspondiente
+            if(loggedInEmail === ADMIN_EMAIL && currentUserEmail === null) {
+                mostrarPanelAdmin();
+            } else {
+                mostrarCategorias();
+            }
+        }
     };
 
+    // --- AUTH LOGIN/REGISTRO ---
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
@@ -187,18 +153,102 @@
     }
 
     async function initSession(user) {
-        try {
-            currentUserEmail = user.email;
+        loggedInEmail = user.email;
+        document.getElementById('loading-screen').classList.remove('hidden');
+
+        // Si es el admin, cargar panel admin
+        if (loggedInEmail === ADMIN_EMAIL) {
+            currentUserEmail = null; 
+            await cargarPanelAdmin();
+        } else {
+            // Si es un usuario normal, cargar su perfil
+            await cargarPerfilUsuario(loggedInEmail);
+        }
+    }
+
+    // --- LÓGICA DE ADMINISTRADOR ---
+    async function cargarPanelAdmin() {
+        document.getElementById('loading-screen').classList.add('hidden');
+        document.getElementById('vista-login').classList.add('hidden');
+        document.getElementById('app-content').classList.remove('hidden');
+
+        mostrarPanelAdmin(); // Controla la visibilidad de los divs
+
+        const snapshot = await db.collection('usuarios').get();
+        const lista = document.getElementById('lista-usuarios-admin');
+        let html = '';
+        
+        snapshot.forEach(doc => {
+            if(doc.id !== ADMIN_EMAIL) { // No mostrar al admin en la lista
+                const username = doc.id.split('@')[0];
+                html += `
+                <div class="bg-card p-5 rounded-2xl flex justify-between items-center border border-white/5 shadow-md">
+                    <span class="font-black text-white uppercase italic text-lg">${username}</span>
+                    <div class="flex gap-2">
+                        <button onclick="administrarUsuario('${doc.id}')" class="bg-white text-black px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95">Ver/Editar</button>
+                        <button onclick="borrarUsuario('${doc.id}')" class="bg-red-900/50 text-red-500 border border-red-900 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95">Baja</button>
+                    </div>
+                </div>`;
+            }
+        });
+        lista.innerHTML = html || '<p class="text-center text-gray-600 font-bold uppercase text-[10px] mt-10">Sin usuarios registrados</p>';
+    }
+
+    function mostrarPanelAdmin() {
+        document.getElementById('vista-admin').classList.remove('hidden');
+        document.getElementById('vista-categorias').classList.add('hidden');
+        document.getElementById('vista-platos').classList.add('hidden');
+        document.getElementById('btn-admin-volver').classList.add('hidden');
+        
+        // Ocultar botones de ajuste y peso al estar en el panel principal de admin
+        document.getElementById('btn-peso').classList.add('hidden');
+        document.getElementById('btn-ajustes').classList.add('hidden');
+    }
+
+    async function administrarUsuario(email) {
+        document.getElementById('loading-screen').classList.remove('hidden');
+        await cargarPerfilUsuario(email);
+        
+        // Configurar botones para que el admin sepa que está editando
+        document.getElementById('btn-admin-volver').classList.remove('hidden');
+        document.getElementById('display-user').innerHTML = `${email.split('@')[0]} <span class="text-[9px] text-yellow-500 font-black bg-yellow-900/30 px-2 py-1 rounded-md ml-2 relative -top-1">MODO ADMIN</span>`;
+    }
+
+    function volverPanelAdmin() {
+        currentUserEmail = null;
+        userData = null;
+        cargarPanelAdmin();
+    }
+
+    async function borrarUsuario(email) {
+        const username = email.split('@')[0].toUpperCase();
+        if(confirm(`⚠️ ATENCIÓN: Vas a borrar PERMANENTEMENTE al usuario ${username} y todo su progreso.\n\n¿Estás completamente seguro?`)) {
             document.getElementById('loading-screen').classList.remove('hidden');
+            try {
+                await db.collection('usuarios').doc(email).delete();
+                await cargarPanelAdmin();
+            } catch (e) {
+                alert("Error al borrar usuario: " + e.message);
+            }
+            document.getElementById('loading-screen').classList.add('hidden');
+        }
+    }
+
+    // --- CARGA DE PERFIL (Normal o Impersonado por Admin) ---
+    async function cargarPerfilUsuario(email) {
+        try {
+            currentUserEmail = email;
             const doc = await db.collection('usuarios').doc(currentUserEmail).get();
             
             if(doc.exists) {
                 userData = doc.data();
+                let needsSave = false;
                 if (!userData.rutina.find(d => d.id === 'SÁBADO')) {
                     userData.rutina.push({ id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
                     userData.rutina.push({ id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
-                    save();
+                    needsSave = true;
                 }
+                if(needsSave) save();
             } else {
                 userData = {
                     rutina: [
@@ -218,6 +268,12 @@
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('vista-login').classList.add('hidden');
             document.getElementById('app-content').classList.remove('hidden');
+            
+            document.getElementById('vista-admin').classList.add('hidden');
+            document.getElementById('vista-categorias').classList.remove('hidden');
+            document.getElementById('btn-peso').classList.remove('hidden');
+            document.getElementById('btn-ajustes').classList.remove('hidden');
+
             document.getElementById('display-user').innerText = currentUserEmail.split('@')[0];
             renderDashboard();
         } catch (error) {
@@ -231,6 +287,7 @@
     async function save() { if(currentUserEmail) await db.collection('usuarios').doc(currentUserEmail).update(userData); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
+    // --- DASHBOARD Y LISTA ---
     function renderDashboard() {
         document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
             <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer shadow-lg">
@@ -262,17 +319,26 @@
     }
 
     function getMax(series) { return series.length ? Math.max(...series.map(s => parseFloat(s.peso))) : '-'; }
-    function mostrarCategorias() { document.getElementById('vista-categorias').classList.remove('hidden'); document.getElementById('logo-header').classList.remove('hidden'); document.getElementById('vista-platos').classList.add('hidden'); document.getElementById('btn-atras').classList.add('hidden'); renderDashboard(); }
+    function mostrarCategorias() { 
+        document.getElementById('vista-categorias').classList.remove('hidden'); 
+        document.getElementById('logo-header').classList.remove('hidden'); 
+        document.getElementById('vista-platos').classList.add('hidden'); 
+        document.getElementById('btn-atras').classList.add('hidden'); 
+        renderDashboard(); 
+    }
 
+    // --- OPCIONES DE EJERCICIO ---
     function abrirOpcionesEjercicio(id) { history.pushState({ view: 'modal' }, ""); ejercicioAEditarId = id; const e = userData.ejercicios.find(x => x.id === id); document.getElementById('edit-nombre-ejercicio').value = e.nombre; document.getElementById('modal-opciones-ejercicio').classList.remove('translate-y-full'); }
     function guardarNombreEjercicio() { const nuevoNombre = document.getElementById('edit-nombre-ejercicio').value.trim(); if(!nuevoNombre) return; userData.ejercicios.find(x => x.id === ejercicioAEditarId).nombre = nuevoNombre; save(); actualizarListaEjercicios(); history.back(); }
     function eliminarEjercicio() { if(confirm("¿Seguro que quieres borrar este ejercicio y todo su historial?")) { userData.ejercicios = userData.ejercicios.filter(x => x.id !== ejercicioAEditarId); save(); actualizarListaEjercicios(); history.back(); } }
 
+    // --- MODALES Y TRACKING ---
     function abrirModalNuevoEjercicio() { history.pushState({view:'modal'}, ""); document.getElementById('modal-nuevo-ejercicio').classList.remove('translate-y-full'); setTimeout(() => document.getElementById('input-nombre-ejercicio').focus(), 300); }
     function confirmarNuevoEjercicio() { const n = document.getElementById('input-nombre-ejercicio').value.trim(); if(!n) return; userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: n, series: [] }); save(); document.getElementById('input-nombre-ejercicio').value = ""; actualizarListaEjercicios(); history.back(); }
 
     function openTracking(id) { history.pushState({view:'modal'}, ""); ejercicioActualId = id; const e = userData.ejercicios.find(x => x.id === id); document.getElementById('detail-title').innerText = e.nombre; actualizarHistorial(); document.getElementById('exercise-detail').classList.remove('translate-y-full'); }
     function guardarSerie() { const p = document.getElementById('input-peso-ejercicio').value, r = document.getElementById('input-reps').value; if(!p || !r) return; userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}) }); save(); actualizarHistorial(); actualizarListaEjercicios(); document.getElementById('input-peso-ejercicio').value = ''; document.getElementById('input-reps').value = ''; }
+    
     function actualizarHistorial() {
         const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
         const grupos = e.series.reduce((acc, s) => { if (!acc[s.fecha]) acc[s.fecha] = []; acc[s.fecha].push(s); return acc; }, {});
@@ -292,25 +358,11 @@
     function deleteSerie(id) { if(confirm("¿Borrar?")) { const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); e.series = e.series.filter(s => s.id !== id); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
     function addSeriePasada(f) { const p = prompt("Peso ("+f+"):"), r = prompt("Reps:"); if(p && r) { userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: f }); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
 
-    function abrirGraficaEjercicio() {
-        history.pushState({v:'m'}, ""); const e = userData.ejercicios.find(x => x.id === ejercicioActualId); document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full');
-        setTimeout(() => { const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d'); const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {}); if (ejercicioChart) ejercicioChart.destroy(); ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } }); }, 100);
-    }
-    function abrirPeso() {
-        history.pushState({v:'m'}, ""); document.getElementById('modal-peso').classList.remove('translate-y-full');
-        setTimeout(() => { const ctx = document.getElementById('chartPeso').getContext('2d'); if(pesoChart) pesoChart.destroy(); pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } }); }, 100);
-    }
+    function abrirGraficaEjercicio() { history.pushState({v:'m'}, ""); const e = userData.ejercicios.find(x => x.id === ejercicioActualId); document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full'); setTimeout(() => { const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d'); const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {}); if (ejercicioChart) ejercicioChart.destroy(); ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } }); }, 100); }
+    function abrirPeso() { history.pushState({v:'m'}, ""); document.getElementById('modal-peso').classList.remove('translate-y-full'); setTimeout(() => { const ctx = document.getElementById('chartPeso').getContext('2d'); if(pesoChart) pesoChart.destroy(); pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } }); }, 100); }
     function registrarPesoHoy() { const p = parseFloat(document.getElementById('input-peso-actual').value); if(!p) return; userData.historialPeso.push({ fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}), valor: p }); save(); abrirPeso(); }
     
-    function abrirEditorRutina() {
-        history.pushState({v:'m'}, "");
-        document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `
-            <div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5">
-                <div class="flex justify-between items-center"><span class="font-black text-white italic text-sm font-black">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div>
-                <input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none">
-            </div>`).join('');
-        document.getElementById('modal-rutina').classList.remove('translate-y-full');
-    }
+    function abrirEditorRutina() { history.pushState({v:'m'}, ""); document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `<div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5"><div class="flex justify-between items-center"><span class="font-black text-white italic text-sm font-black">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div><input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none"></div>`).join(''); document.getElementById('modal-rutina').classList.remove('translate-y-full'); }
     function guardarConfiguracionRutina() { userData.rutina.forEach((dia, index) => { dia.activo = document.getElementById(`check-${index}`).checked; dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; }); save(); history.back(); }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -318,10 +370,7 @@
             if (user) initSession(user);
             else { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
         });
-        setTimeout(() => {
-            const loader = document.getElementById('loading-screen');
-            if (!loader.classList.contains('hidden')) { loader.classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
-        }, 4000);
+        setTimeout(() => { const loader = document.getElementById('loading-screen'); if (!loader.classList.contains('hidden')) { loader.classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); } }, 4000);
     });
 </script>
 
