@@ -109,11 +109,11 @@
         <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2>
         <input type="text" id="input-nombre-ejercicio" placeholder="Nombre (Ej: Press Banca)" class="w-full text-center text-lg font-bold mb-4">
         
-        <p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos Predefinidos (Opcional)</p>
+        <p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos (Opcional)</p>
         <div class="grid grid-cols-3 gap-2 mb-6">
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="number" id="new-target-peso" placeholder="-" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="number" id="new-target-reps" placeholder="-" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Desc(s)</label><input type="number" id="new-target-rest" placeholder="-" class="text-center font-bold text-sm"></div>
+            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="text" id="new-target-peso" placeholder="Ej: 80" class="text-center font-bold text-sm"></div>
+            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="text" id="new-target-reps" placeholder="Ej: 8-12" class="text-center font-bold text-sm"></div>
+            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Descanso</label><input type="text" id="new-target-rest" placeholder="Ej: 2:30" class="text-center font-bold text-sm"></div>
         </div>
 
         <button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button>
@@ -126,11 +126,11 @@
         <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Ejercicio</h2>
         <input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-4 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]">
         
-        <p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos Predefinidos (Opcional)</p>
+        <p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos (Opcional)</p>
         <div class="grid grid-cols-3 gap-2 mb-6">
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="number" id="edit-target-peso" placeholder="-" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="number" id="edit-target-reps" placeholder="-" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Desc(s)</label><input type="number" id="edit-target-rest" placeholder="-" class="text-center font-bold text-sm"></div>
+            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="text" id="edit-target-peso" placeholder="Ej: 80" class="text-center font-bold text-sm"></div>
+            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="text" id="edit-target-reps" placeholder="Ej: 8-12" class="text-center font-bold text-sm"></div>
+            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Descanso</label><input type="text" id="edit-target-rest" placeholder="Ej: 2:30" class="text-center font-bold text-sm"></div>
         </div>
 
         <button onclick="guardarOpcionesEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Cambios</button>
@@ -260,12 +260,7 @@
         const nombre = prompt("Nombre de la plantilla:"); if (!nombre) return;
         const desc = prompt("Descripción breve:") || "Creada por Admin";
         document.getElementById('loading-screen').classList.remove('hidden');
-        
-        // Al guardar plantilla, guardamos también los targets si existen, pero vaciamos las series
-        const ejerciciosLimpios = userData.ejercicios.map(e => ({
-            dia: e.dia, nombre: e.nombre, targetPeso: e.targetPeso, targetReps: e.targetReps, targetRest: e.targetRest, series: []
-        }));
-
+        const ejerciciosLimpios = userData.ejercicios.map(e => ({ dia: e.dia, nombre: e.nombre, targetPeso: e.targetPeso, targetReps: e.targetReps, targetRest: e.targetRest, series: [] }));
         plantillasGlobales.push({ id: 'T_' + Date.now(), nombre: nombre, desc: desc, rutina: userData.rutina, ejercicios: ejerciciosLimpios });
         await db.collection('configuracion').doc('plantillas').set({ lista: plantillasGlobales });
         document.getElementById('loading-screen').classList.add('hidden'); alert("¡Plantilla guardada!");
@@ -359,13 +354,11 @@
 
     function confirmarNuevoEjercicio() { 
         const n = document.getElementById('input-nombre-ejercicio').value.trim(); if(!n) return; 
-        const tp = document.getElementById('new-target-peso').value;
-        const tr = document.getElementById('new-target-reps').value;
-        const trst = document.getElementById('new-target-rest').value;
-
         userData.ejercicios.push({ 
             id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: n, series: [],
-            targetPeso: tp || null, targetReps: tr || null, targetRest: trst || null
+            targetPeso: document.getElementById('new-target-peso').value.trim() || null, 
+            targetReps: document.getElementById('new-target-reps').value.trim() || null, 
+            targetRest: document.getElementById('new-target-rest').value.trim() || null
         }); 
         save(); actualizarListaEjercicios(); history.back(); 
     }
@@ -384,9 +377,9 @@
         const n = document.getElementById('edit-nombre-ejercicio').value.trim(); if(!n) return; 
         const e = userData.ejercicios.find(x => x.id === ejercicioAEditarId);
         e.nombre = n; 
-        e.targetPeso = document.getElementById('edit-target-peso').value || null;
-        e.targetReps = document.getElementById('edit-target-reps').value || null;
-        e.targetRest = document.getElementById('edit-target-rest').value || null;
+        e.targetPeso = document.getElementById('edit-target-peso').value.trim() || null;
+        e.targetReps = document.getElementById('edit-target-reps').value.trim() || null;
+        e.targetRest = document.getElementById('edit-target-rest').value.trim() || null;
         save(); actualizarListaEjercicios(); history.back(); 
     }
 
@@ -397,25 +390,19 @@
         const e = userData.ejercicios.find(x => x.id === id); 
         document.getElementById('detail-title').innerText = e.nombre; 
         
-        // Poner placeholder si hay target
-        document.getElementById('input-peso-ejercicio').placeholder = e.targetPeso || '0';
-        document.getElementById('input-reps').placeholder = e.targetReps || '0';
-
-        // Construir Banner de Objetivos
         let t = [];
-        if(e.targetPeso) t.push(`🎯 ${e.targetPeso} kg`);
-        if(e.targetReps) t.push(`🔄 ${e.targetReps} reps`);
-        if(e.targetRest) t.push(`⏱️ ${e.targetRest}s`);
+        if(e.targetPeso) t.push(`🎯 ${e.targetPeso}${e.targetPeso.toLowerCase().includes('kg') ? '' : ' kg'}`);
+        if(e.targetReps) t.push(`🔄 ${e.targetReps}${e.targetReps.toLowerCase().includes('rep') ? '' : ' reps'}`);
+        if(e.targetRest) t.push(`⏱️ ${e.targetRest}`);
 
         const displayDiv = document.getElementById('exercise-targets-display');
         if(t.length > 0) {
-            displayDiv.innerHTML = `<div class="bg-blue-900/20 border border-blue-900/50 text-blue-400 text-[10px] uppercase font-black tracking-widest py-2 px-4 rounded-xl mb-6 flex justify-center gap-3">${t.map(x => `<span>${x}</span>`).join('<span class="opacity-30">|</span>')}</div>`;
+            displayDiv.innerHTML = `<div class="bg-blue-900/20 border border-blue-900/50 text-blue-400 text-[10px] uppercase font-black tracking-widest py-3 px-4 rounded-xl mb-6 flex justify-center gap-4 flex-wrap">${t.map(x => `<span>${x}</span>`).join('<span class="opacity-30 hidden sm:inline">|</span>')}</div>`;
         } else {
             displayDiv.innerHTML = '';
         }
 
-        actualizarHistorial(); 
-        document.getElementById('exercise-detail').classList.remove('translate-y-full'); 
+        actualizarHistorial(); document.getElementById('exercise-detail').classList.remove('translate-y-full'); 
     }
 
     function guardarSerie() { const p = document.getElementById('input-peso-ejercicio').value, r = document.getElementById('input-reps').value; if(!p || !r) return; userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}) }); save(); actualizarHistorial(); actualizarListaEjercicios(); document.getElementById('input-peso-ejercicio').value = ''; document.getElementById('input-reps').value = ''; }
