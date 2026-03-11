@@ -116,22 +116,15 @@
 
 <div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-black text-white uppercase italic">Rutina</h2>
+        <h2 class="text-2xl font-black text-white uppercase italic font-black">Rutina</h2>
         <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
     </div>
     
     <div id="lista-edicion-dias" class="space-y-3 mb-8"></div>
     
-    <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl mb-12 active:scale-95 transition-transform">
+    <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">
         Guardar Cambios
     </button>
-</div>
-    
-    <div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none flex items-end h-32">
-        <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest shadow-2xl pointer-events-auto active:scale-95 transition-transform">
-            Guardar Cambios
-        </button>
-    </div>
 </div>
 
 <div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
@@ -150,7 +143,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. CONFIGURACIÓN FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyBQFAGhldjoZIvMfMCLRYHhRuKG3avMfdU",
         authDomain: "gymtrack-f7f04.firebaseapp.com",
@@ -167,7 +159,6 @@
     let currentUserEmail = null, userData = null;
     let pesoChart = null, ejercicioChart = null, ejercicioActualId = null, serieAEditarId = null, ejercicioAEditarId = null;
 
-    // --- NAVEGACIÓN INTELIGENTE ---
     window.onpopstate = function(event) {
         const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie', 'modal-opciones-ejercicio'];
         modales.forEach(id => {
@@ -177,13 +168,10 @@
         if (!event.state) mostrarCategorias();
     };
 
-    // --- AUTH LOGIN/REGISTRO ---
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
-        
         if(!user || pass.length < 6) return alert("Por favor, introduce un usuario y una contraseña de al menos 6 caracteres.");
-
         const email = user + "@gymtrack.com";
 
         auth.signInWithEmailAndPassword(email, pass)
@@ -206,23 +194,19 @@
             
             if(doc.exists) {
                 userData = doc.data();
-                
-                // --- PARCHE AUTOMÁTICO: Añadir Sábado y Domingo si no existen ---
                 if (!userData.rutina.find(d => d.id === 'SÁBADO')) {
                     userData.rutina.push({ id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
                     userData.rutina.push({ id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
-                    save(); // Lo guardamos en la nube para arreglarlo permanentemente
+                    save();
                 }
-            }
-            else {
-                // Nuevo usuario
+            } else {
                 userData = {
                     rutina: [
                         { id: 'LUNES', musculo: 'Pecho', activo: true, img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200' },
                         { id: 'MARTES', musculo: 'Espalda', activo: true, img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200' },
                         { id: 'MIÉRCOLES', musculo: 'Pierna', activo: true, img: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=200' },
                         { id: 'JUEVES', musculo: 'Hombro', activo: true, img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=200' },
-                        { id: 'VIERNES', musculo: 'Brazos', activo: true, img: 'https://images.unsplash.com/photo-1583454110551-21f2fa2adfcd?w=200' },
+                        { id: 'VIERNES', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
                         { id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
                         { id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' }
                     ],
@@ -247,7 +231,6 @@
     async function save() { if(currentUserEmail) await db.collection('usuarios').doc(currentUserEmail).update(userData); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
-    // --- DASHBOARD Y LISTA ---
     function renderDashboard() {
         document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
             <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer shadow-lg">
@@ -279,62 +262,17 @@
     }
 
     function getMax(series) { return series.length ? Math.max(...series.map(s => parseFloat(s.peso))) : '-'; }
-    function mostrarCategorias() { 
-        document.getElementById('vista-categorias').classList.remove('hidden'); 
-        document.getElementById('logo-header').classList.remove('hidden'); 
-        document.getElementById('vista-platos').classList.add('hidden'); 
-        document.getElementById('btn-atras').classList.add('hidden'); 
-        renderDashboard(); 
-    }
+    function mostrarCategorias() { document.getElementById('vista-categorias').classList.remove('hidden'); document.getElementById('logo-header').classList.remove('hidden'); document.getElementById('vista-platos').classList.add('hidden'); document.getElementById('btn-atras').classList.add('hidden'); renderDashboard(); }
 
-    // --- OPCIONES DE EJERCICIO ---
-    function abrirOpcionesEjercicio(id) {
-        history.pushState({ view: 'modal' }, "");
-        ejercicioAEditarId = id;
-        const e = userData.ejercicios.find(x => x.id === id);
-        document.getElementById('edit-nombre-ejercicio').value = e.nombre;
-        document.getElementById('modal-opciones-ejercicio').classList.remove('translate-y-full');
-    }
+    function abrirOpcionesEjercicio(id) { history.pushState({ view: 'modal' }, ""); ejercicioAEditarId = id; const e = userData.ejercicios.find(x => x.id === id); document.getElementById('edit-nombre-ejercicio').value = e.nombre; document.getElementById('modal-opciones-ejercicio').classList.remove('translate-y-full'); }
+    function guardarNombreEjercicio() { const nuevoNombre = document.getElementById('edit-nombre-ejercicio').value.trim(); if(!nuevoNombre) return; userData.ejercicios.find(x => x.id === ejercicioAEditarId).nombre = nuevoNombre; save(); actualizarListaEjercicios(); history.back(); }
+    function eliminarEjercicio() { if(confirm("¿Seguro que quieres borrar este ejercicio y todo su historial?")) { userData.ejercicios = userData.ejercicios.filter(x => x.id !== ejercicioAEditarId); save(); actualizarListaEjercicios(); history.back(); } }
 
-    function guardarNombreEjercicio() {
-        const nuevoNombre = document.getElementById('edit-nombre-ejercicio').value.trim();
-        if(!nuevoNombre) return;
-        userData.ejercicios.find(x => x.id === ejercicioAEditarId).nombre = nuevoNombre;
-        save(); actualizarListaEjercicios(); history.back();
-    }
-
-    function eliminarEjercicio() {
-        if(confirm("¿Seguro que quieres borrar este ejercicio y todo su historial?")) {
-            userData.ejercicios = userData.ejercicios.filter(x => x.id !== ejercicioAEditarId);
-            save(); actualizarListaEjercicios(); history.back();
-        }
-    }
-
-    // --- MODALES Y TRACKING ---
     function abrirModalNuevoEjercicio() { history.pushState({view:'modal'}, ""); document.getElementById('modal-nuevo-ejercicio').classList.remove('translate-y-full'); setTimeout(() => document.getElementById('input-nombre-ejercicio').focus(), 300); }
-    function confirmarNuevoEjercicio() {
-        const n = document.getElementById('input-nombre-ejercicio').value.trim();
-        if(!n) return;
-        userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: n, series: [] });
-        save(); document.getElementById('input-nombre-ejercicio').value = ""; actualizarListaEjercicios(); history.back();
-    }
+    function confirmarNuevoEjercicio() { const n = document.getElementById('input-nombre-ejercicio').value.trim(); if(!n) return; userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: n, series: [] }); save(); document.getElementById('input-nombre-ejercicio').value = ""; actualizarListaEjercicios(); history.back(); }
 
-    function openTracking(id) {
-        history.pushState({view:'modal'}, "");
-        ejercicioActualId = id;
-        const e = userData.ejercicios.find(x => x.id === id);
-        document.getElementById('detail-title').innerText = e.nombre;
-        actualizarHistorial();
-        document.getElementById('exercise-detail').classList.remove('translate-y-full');
-    }
-
-    function guardarSerie() {
-        const p = document.getElementById('input-peso-ejercicio').value, r = document.getElementById('input-reps').value;
-        if(!p || !r) return;
-        userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}) });
-        save(); actualizarHistorial(); actualizarListaEjercicios(); document.getElementById('input-peso-ejercicio').value = ''; document.getElementById('input-reps').value = '';
-    }
-
+    function openTracking(id) { history.pushState({view:'modal'}, ""); ejercicioActualId = id; const e = userData.ejercicios.find(x => x.id === id); document.getElementById('detail-title').innerText = e.nombre; actualizarHistorial(); document.getElementById('exercise-detail').classList.remove('translate-y-full'); }
+    function guardarSerie() { const p = document.getElementById('input-peso-ejercicio').value, r = document.getElementById('input-reps').value; if(!p || !r) return; userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}) }); save(); actualizarHistorial(); actualizarListaEjercicios(); document.getElementById('input-peso-ejercicio').value = ''; document.getElementById('input-reps').value = ''; }
     function actualizarHistorial() {
         const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
         const grupos = e.series.reduce((acc, s) => { if (!acc[s.fecha]) acc[s.fecha] = []; acc[s.fecha].push(s); return acc; }, {});
@@ -354,28 +292,16 @@
     function deleteSerie(id) { if(confirm("¿Borrar?")) { const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); e.series = e.series.filter(s => s.id !== id); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
     function addSeriePasada(f) { const p = prompt("Peso ("+f+"):"), r = prompt("Reps:"); if(p && r) { userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: f }); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
 
-    // --- GRÁFICAS, RUTINA Y PESO ---
     function abrirGraficaEjercicio() {
-        history.pushState({v:'m'}, "");
-        const e = userData.ejercicios.find(x => x.id === ejercicioActualId);
-        document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full');
-        setTimeout(() => {
-            const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d');
-            const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {});
-            if (ejercicioChart) ejercicioChart.destroy();
-            ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } });
-        }, 100);
+        history.pushState({v:'m'}, ""); const e = userData.ejercicios.find(x => x.id === ejercicioActualId); document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full');
+        setTimeout(() => { const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d'); const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {}); if (ejercicioChart) ejercicioChart.destroy(); ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } }); }, 100);
     }
     function abrirPeso() {
-        history.pushState({v:'m'}, "");
-        document.getElementById('modal-peso').classList.remove('translate-y-full');
-        setTimeout(() => {
-            const ctx = document.getElementById('chartPeso').getContext('2d');
-            if(pesoChart) pesoChart.destroy();
-            pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } });
-        }, 100);
+        history.pushState({v:'m'}, ""); document.getElementById('modal-peso').classList.remove('translate-y-full');
+        setTimeout(() => { const ctx = document.getElementById('chartPeso').getContext('2d'); if(pesoChart) pesoChart.destroy(); pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } }); }, 100);
     }
     function registrarPesoHoy() { const p = parseFloat(document.getElementById('input-peso-actual').value); if(!p) return; userData.historialPeso.push({ fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}), valor: p }); save(); abrirPeso(); }
+    
     function abrirEditorRutina() {
         history.pushState({v:'m'}, "");
         document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `
@@ -387,24 +313,14 @@
     }
     function guardarConfiguracionRutina() { userData.rutina.forEach((dia, index) => { dia.activo = document.getElementById(`check-${index}`).checked; dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; }); save(); history.back(); }
 
-    // --- ARRANQUE SEGURO ---
     document.addEventListener("DOMContentLoaded", () => {
         auth.onAuthStateChanged(user => {
-            if (user) {
-                initSession(user);
-            } else {
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('vista-login').classList.remove('hidden');
-            }
+            if (user) initSession(user);
+            else { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
         });
-
-        // Failsafe: Si Firebase no responde en 4 segundos, mostrar login
         setTimeout(() => {
             const loader = document.getElementById('loading-screen');
-            if (!loader.classList.contains('hidden')) {
-                loader.classList.add('hidden');
-                document.getElementById('vista-login').classList.remove('hidden');
-            }
+            if (!loader.classList.contains('hidden')) { loader.classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
         }, 4000);
     });
 </script>
