@@ -14,9 +14,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input { background-color: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; outline: none; transition: border 0.3s; }
         input:focus { border-color: #fff; }
-        /* Ocultar flechas de los input number */
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        
         .fecha-header { cursor: pointer; transition: background 0.2s; }
         .fecha-contenido { transition: max-height 0.3s ease-out; overflow: hidden; }
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
@@ -39,8 +36,8 @@
         <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] font-bold">Cloud Sync Active</p>
     </div>
     <div class="space-y-4 max-w-sm mx-auto w-full">
-        <input type="text" id="login-user" placeholder="Usuario" class="w-full text-center">
-        <input type="password" id="login-pass" placeholder="Contraseña" class="w-full text-center">
+        <input type="text" id="login-user" placeholder="Usuario" class="w-full">
+        <input type="password" id="login-pass" placeholder="Contraseña" class="w-full">
         <button onclick="handleAuth()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-xs tracking-widest mt-4 active:scale-95 transition-all">Entrar</button>
     </div>
 </div>
@@ -49,12 +46,7 @@
     <header class="bg-black/80 backdrop-blur-md text-white h-20 sticky top-0 z-50 flex justify-between items-center px-6 border-b border-white/5">
         <button id="btn-atras" onclick="history.back()" class="hidden text-[10px] bg-white/5 px-4 py-2 rounded-full border border-white/10 font-black">← VOLVER</button>
         <h1 id="logo-header" class="text-xl font-black tracking-tighter">GYM<span class="text-gray-500 font-normal">TRACK</span></h1>
-        
         <div class="flex items-center gap-2">
-            <button onclick="abrirTemporizador()" class="bg-white/5 p-2 rounded-xl border border-white/10 relative">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                <span id="badge-timer" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>
-            </button>
             <button onclick="abrirPeso()" class="bg-white/5 p-2 rounded-xl border border-white/10">📊</button>
             <button onclick="abrirEditorRutina()" class="bg-white/5 p-2 rounded-xl border border-white/10">⚙️</button>
             <button onclick="logout()" class="ml-2 text-[9px] font-black opacity-30 uppercase">Salir</button>
@@ -76,59 +68,81 @@
     </main>
 </div>
 
-<div id="modal-temporizador" class="fixed inset-0 z-[110] transform translate-y-full transition-transform duration-500 ease-in-out bg-black flex flex-col justify-between pb-10">
-    <div>
-        <div class="flex justify-between items-center p-6 mb-4">
-            <h2 class="text-2xl font-black text-white uppercase italic">Descanso</h2>
-            <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full font-bold">✕</button>
-        </div>
-
-        <div class="flex justify-center items-center h-40">
-            <div id="timer-setup" class="flex justify-center items-center gap-2">
-                <div class="flex flex-col items-center">
-                    <input type="number" id="timer-min" value="1" min="0" max="99" class="text-7xl font-black text-center w-32 bg-transparent border-none text-white tabular-nums p-0">
-                    <span class="text-gray-500 text-xs font-bold uppercase">Min</span>
-                </div>
-                <span class="text-5xl font-black text-white mb-6">:</span>
-                <div class="flex flex-col items-center">
-                    <input type="number" id="timer-sec" value="30" min="0" max="59" class="text-7xl font-black text-center w-32 bg-transparent border-none text-white tabular-nums p-0">
-                    <span class="text-gray-500 text-xs font-bold uppercase">Seg</span>
-                </div>
-            </div>
-
-            <div id="timer-running" class="hidden flex justify-center items-center">
-                <h1 id="timer-display" class="text-[5rem] font-black text-white tabular-nums tracking-tighter">01:30</h1>
-            </div>
-        </div>
-
-        <div class="flex justify-between items-center px-12 mt-8">
-            <button onclick="cancelarTemporizador()" class="w-20 h-20 rounded-full bg-zinc-800 text-gray-300 font-bold uppercase text-[10px] tracking-widest active:bg-zinc-700 transition-colors">Cancelar</button>
-            <button id="btn-timer-action" onclick="toggleTemporizador()" class="w-20 h-20 rounded-full bg-white text-black font-black uppercase text-[10px] tracking-widest active:bg-gray-300 transition-colors">Iniciar</button>
-        </div>
-    </div>
-
-    <div class="px-6">
-        <h3 class="text-[10px] uppercase text-gray-500 font-black tracking-widest mb-4">Tiempos Recientes</h3>
-        <div id="lista-timers-recientes" class="flex overflow-x-auto gap-3 pb-4 scrollbar-hide">
-            </div>
+<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[110] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
+    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
+        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2>
+        <input type="text" id="input-nombre-ejercicio" placeholder="Ej: Press Militar" class="w-full text-center text-lg font-bold mb-4">
+        <button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button>
+        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4 text-center">Cancelar</button>
     </div>
 </div>
 
-<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2><input type="text" id="input-nombre-ejercicio" placeholder="Ej: Press Militar" class="w-full text-center text-lg font-bold mb-4"><button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4 text-center">Cancelar</button></div></div>
-<div id="modal-opciones-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Opciones</h2><input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-6 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]"><button onclick="guardarNombreEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Nombre</button><button onclick="eliminarEjercicio()" class="w-full bg-red-900/80 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Eliminar Ejercicio</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-2 text-center">Cancelar</button></div></div>
-<div id="modal-editar-serie" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Serie</h2><div class="grid grid-cols-2 gap-4 mb-6"><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="edit-peso-val" class="text-center font-bold text-xl"></div><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repes</label><input type="number" id="edit-reps-val" class="text-center font-bold text-xl"></div></div><button onclick="confirmarEdicionSerie()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Guardar</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-6 text-center">Cancelar</button></div></div>
-<div id="exercise-detail" class="fixed inset-0 z-[90] transform translate-y-full transition-transform duration-500 ease-in-out bg-[#0a0a0a] p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><div class="flex items-center gap-3"><h2 id="detail-title" class="text-3xl font-black text-white uppercase italic leading-none"></h2><button onclick="abrirGraficaEjercicio()" class="bg-white/10 p-2 rounded-lg border border-white/10 mt-1">📈</button></div><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div class="bg-card rounded-[2rem] p-6 border border-white/5 mb-8"><div class="grid grid-cols-2 gap-4"><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="input-peso-ejercicio" placeholder="0" class="text-xl font-bold text-center"></div><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repeticiones</label><input type="number" id="input-reps" placeholder="0" class="text-xl font-bold text-center"></div></div><button onclick="guardarSerie()" class="mt-4 w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs">Registrar Serie</button></div><div id="historial-agrupado" class="space-y-3 pb-20"></div></div>
+<div id="modal-opciones-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
+    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
+        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Opciones</h2>
+        <input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-6 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]">
+        <button onclick="guardarNombreEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Nombre</button>
+        <button onclick="eliminarEjercicio()" class="w-full bg-red-900/80 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Eliminar Ejercicio</button>
+        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-2 text-center">Cancelar</button>
+    </div>
+</div>
 
-<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic font-black">Rutina</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div id="lista-edicion-dias" class="space-y-3 mb-8"></div><button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">Guardar Cambios</button></div>
-<div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic">Peso</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div class="bg-card p-4 rounded-[2rem] border border-white/5 mb-6"><canvas id="chartPeso"></canvas></div><div class="bg-card p-6 rounded-[2rem] border border-white/5"><div class="flex gap-2"><input type="number" id="input-peso-actual" step="0.1" class="flex-1 text-xl font-bold text-center" placeholder="Kg hoy"><button onclick="registrarPesoHoy()" class="bg-white text-black px-6 rounded-xl font-black text-xs uppercase">OK</button></div></div></div>
-<div id="modal-grafica-ejercicio" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6"><div class="flex justify-between items-center mb-10"><h2 class="text-2xl font-black text-white uppercase italic">Evolución</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full font-bold">✕</button></div><div class="bg-card p-6 rounded-[2.5rem] border border-white/5 shadow-2xl"><canvas id="chartEjercicioIndividual"></canvas></div></div>
+<div id="modal-editar-serie" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
+    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
+        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Serie</h2>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="edit-peso-val" class="text-center font-bold text-xl"></div>
+            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repes</label><input type="number" id="edit-reps-val" class="text-center font-bold text-xl"></div>
+        </div>
+        <button onclick="confirmarEdicionSerie()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Guardar</button>
+        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-6 text-center">Cancelar</button>
+    </div>
+</div>
+
+<div id="exercise-detail" class="fixed inset-0 z-[90] transform translate-y-full transition-transform duration-500 ease-in-out bg-[#0a0a0a] p-6 overflow-y-auto">
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3"><h2 id="detail-title" class="text-3xl font-black text-white uppercase italic leading-none"></h2><button onclick="abrirGraficaEjercicio()" class="bg-white/10 p-2 rounded-lg border border-white/10 mt-1">📈</button></div>
+        <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
+    </div>
+    <div class="bg-card rounded-[2rem] p-6 border border-white/5 mb-8">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="input-peso-ejercicio" placeholder="0" class="text-xl font-bold"></div>
+            <div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repeticiones</label><input type="number" id="input-reps" placeholder="0" class="text-xl font-bold"></div>
+        </div>
+        <button onclick="guardarSerie()" class="mt-4 w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs">Registrar Serie</button>
+    </div>
+    <div id="historial-agrupado" class="space-y-3 pb-20"></div>
+</div>
+
+<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-black text-white uppercase italic font-black">Rutina</h2>
+        <button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button>
+    </div>
+    
+    <div id="lista-edicion-dias" class="space-y-3 mb-8"></div>
+    
+    <button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">
+        Guardar Cambios
+    </button>
+</div>
+
+<div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto">
+    <div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic">Peso</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div>
+    <div class="bg-card p-4 rounded-[2rem] border border-white/5 mb-6"><canvas id="chartPeso"></canvas></div>
+    <div class="bg-card p-6 rounded-[2rem] border border-white/5"><div class="flex gap-2"><input type="number" id="input-peso-actual" step="0.1" class="flex-1 text-xl font-bold" placeholder="Kg hoy"><button onclick="registrarPesoHoy()" class="bg-white text-black px-6 rounded-xl font-black text-xs uppercase">OK</button></div></div>
+</div>
+
+<div id="modal-grafica-ejercicio" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6">
+    <div class="flex justify-between items-center mb-10"><h2 class="text-2xl font-black text-white uppercase italic">Evolución</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full font-bold">✕</button></div>
+    <div class="bg-card p-6 rounded-[2.5rem] border border-white/5 shadow-2xl"><canvas id="chartEjercicioIndividual"></canvas></div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. CONFIGURACIÓN FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyBQFAGhldjoZIvMfMCLRYHhRuKG3avMfdU",
         authDomain: "gymtrack-f7f04.firebaseapp.com",
@@ -145,14 +159,8 @@
     let currentUserEmail = null, userData = null;
     let pesoChart = null, ejercicioChart = null, ejercicioActualId = null, serieAEditarId = null, ejercicioAEditarId = null;
 
-    // VARIABLES DEL TEMPORIZADOR
-    let timerInterval = null;
-    let timeRemaining = 0;
-    let isTimerRunning = false;
-
-    // --- NAVEGACIÓN INTELIGENTE ---
     window.onpopstate = function(event) {
-        const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie', 'modal-opciones-ejercicio', 'modal-temporizador'];
+        const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie', 'modal-opciones-ejercicio'];
         modales.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.classList.add('translate-y-full');
@@ -160,7 +168,6 @@
         if (!event.state) mostrarCategorias();
     };
 
-    // --- AUTH LOGIN/REGISTRO ---
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
@@ -187,17 +194,11 @@
             
             if(doc.exists) {
                 userData = doc.data();
-                let needsSave = false;
                 if (!userData.rutina.find(d => d.id === 'SÁBADO')) {
                     userData.rutina.push({ id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
                     userData.rutina.push({ id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' });
-                    needsSave = true;
+                    save();
                 }
-                if (!userData.recentTimers) {
-                    userData.recentTimers = [{m:1, s:30}, {m:2, s:0}, {m:3, s:0}]; // Tiempos por defecto
-                    needsSave = true;
-                }
-                if(needsSave) save();
             } else {
                 userData = {
                     rutina: [
@@ -209,8 +210,7 @@
                         { id: 'SÁBADO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
                         { id: 'DOMINGO', musculo: 'Descanso', activo: false, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' }
                     ],
-                    ejercicios: [], historialPeso: [], pesoObjetivo: 70,
-                    recentTimers: [{m:1, s:30}, {m:2, s:0}, {m:3, s:0}]
+                    ejercicios: [], historialPeso: [], pesoObjetivo: 70
                 };
                 await db.collection('usuarios').doc(currentUserEmail).set(userData);
             }
@@ -231,109 +231,6 @@
     async function save() { if(currentUserEmail) await db.collection('usuarios').doc(currentUserEmail).update(userData); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
-    // --- LÓGICA DEL TEMPORIZADOR ---
-    function abrirTemporizador() {
-        history.pushState({ view: 'modal' }, "");
-        document.getElementById('modal-temporizador').classList.remove('translate-y-full');
-        renderTimersRecientes();
-    }
-
-    function renderTimersRecientes() {
-        const c = document.getElementById('lista-timers-recientes');
-        c.innerHTML = userData.recentTimers.map(t => `
-            <button onclick="setTimer(${t.m}, ${t.s})" class="whitespace-nowrap bg-zinc-900 border border-white/10 px-6 py-3 rounded-2xl text-white font-bold text-sm active:bg-zinc-700 transition-colors">
-                ${t.m}:${t.s < 10 ? '0'+t.s : t.s}
-            </button>
-        `).join('');
-    }
-
-    function setTimer(m, s) {
-        document.getElementById('timer-min').value = m;
-        document.getElementById('timer-sec').value = s;
-        if(isTimerRunning) cancelarTemporizador();
-        toggleTemporizador();
-    }
-
-    function toggleTemporizador() {
-        const btn = document.getElementById('btn-timer-action');
-        if (isTimerRunning) {
-            // Pausar
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            btn.innerText = "Reanudar";
-            btn.classList.replace('bg-white', 'bg-white/20');
-            btn.classList.replace('text-black', 'text-white');
-        } else {
-            // Iniciar o Reanudar
-            if (timeRemaining <= 0) {
-                let m = parseInt(document.getElementById('timer-min').value) || 0;
-                let s = parseInt(document.getElementById('timer-sec').value) || 0;
-                timeRemaining = (m * 60) + s;
-                if(timeRemaining <= 0) return;
-
-                // Guardar en recientes si no existe
-                if(!userData.recentTimers.find(t => t.m === m && t.s === s)) {
-                    userData.recentTimers.unshift({m, s});
-                    if(userData.recentTimers.length > 5) userData.recentTimers.pop();
-                    save(); renderTimersRecientes();
-                }
-            }
-            
-            document.getElementById('timer-setup').classList.add('hidden');
-            document.getElementById('timer-running').classList.remove('hidden');
-            document.getElementById('badge-timer').classList.remove('hidden');
-            
-            btn.innerText = "Pausa";
-            btn.classList.replace('bg-white/20', 'bg-white');
-            btn.classList.replace('text-white', 'text-black');
-            
-            updateTimerDisplay();
-            isTimerRunning = true;
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                updateTimerDisplay();
-                if (timeRemaining <= 0) finTemporizador();
-            }, 1000);
-        }
-    }
-
-    function updateTimerDisplay() {
-        let m = Math.floor(timeRemaining / 60);
-        let s = timeRemaining % 60;
-        document.getElementById('timer-display').innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-    }
-
-    function cancelarTemporizador() {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        timeRemaining = 0;
-        document.getElementById('timer-setup').classList.remove('hidden');
-        document.getElementById('timer-running').classList.add('hidden');
-        document.getElementById('badge-timer').classList.add('hidden');
-        
-        const btn = document.getElementById('btn-timer-action');
-        btn.innerText = "Iniciar";
-        btn.classList.replace('bg-white/20', 'bg-white');
-        btn.classList.replace('text-white', 'text-black');
-    }
-
-    function finTemporizador() {
-        cancelarTemporizador();
-        
-        // Sonido de alerta nativo
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(880, ctx.currentTime);
-            osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.5);
-            setTimeout(() => { const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(880, ctx.currentTime); o2.connect(ctx.destination); o2.start(); o2.stop(ctx.currentTime + 0.5); }, 600);
-        } catch(e) {}
-
-        // Vibración en móviles (Patrón: vibra, para, vibra)
-        if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
-    }
-
-    // --- DASHBOARD Y RESTO DE FUNCIONES ---
     function renderDashboard() {
         document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `
             <div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer shadow-lg">
@@ -395,11 +292,25 @@
     function deleteSerie(id) { if(confirm("¿Borrar?")) { const e = userData.ejercicios.find(ex => ex.id === ejercicioActualId); e.series = e.series.filter(s => s.id !== id); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
     function addSeriePasada(f) { const p = prompt("Peso ("+f+"):"), r = prompt("Reps:"); if(p && r) { userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: f }); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
 
-    function abrirGraficaEjercicio() { history.pushState({v:'m'}, ""); const e = userData.ejercicios.find(x => x.id === ejercicioActualId); document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full'); setTimeout(() => { const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d'); const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {}); if (ejercicioChart) ejercicioChart.destroy(); ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } }); }, 100); }
-    function abrirPeso() { history.pushState({v:'m'}, ""); document.getElementById('modal-peso').classList.remove('translate-y-full'); setTimeout(() => { const ctx = document.getElementById('chartPeso').getContext('2d'); if(pesoChart) pesoChart.destroy(); pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } }); }, 100); }
+    function abrirGraficaEjercicio() {
+        history.pushState({v:'m'}, ""); const e = userData.ejercicios.find(x => x.id === ejercicioActualId); document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full');
+        setTimeout(() => { const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d'); const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {}); if (ejercicioChart) ejercicioChart.destroy(); ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } }); }, 100);
+    }
+    function abrirPeso() {
+        history.pushState({v:'m'}, ""); document.getElementById('modal-peso').classList.remove('translate-y-full');
+        setTimeout(() => { const ctx = document.getElementById('chartPeso').getContext('2d'); if(pesoChart) pesoChart.destroy(); pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } }); }, 100);
+    }
     function registrarPesoHoy() { const p = parseFloat(document.getElementById('input-peso-actual').value); if(!p) return; userData.historialPeso.push({ fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}), valor: p }); save(); abrirPeso(); }
     
-    function abrirEditorRutina() { history.pushState({v:'m'}, ""); document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `<div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5"><div class="flex justify-between items-center"><span class="font-black text-white italic text-sm font-black">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div><input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none"></div>`).join(''); document.getElementById('modal-rutina').classList.remove('translate-y-full'); }
+    function abrirEditorRutina() {
+        history.pushState({v:'m'}, "");
+        document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `
+            <div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5">
+                <div class="flex justify-between items-center"><span class="font-black text-white italic text-sm font-black">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div>
+                <input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none">
+            </div>`).join('');
+        document.getElementById('modal-rutina').classList.remove('translate-y-full');
+    }
     function guardarConfiguracionRutina() { userData.rutina.forEach((dia, index) => { dia.activo = document.getElementById(`check-${index}`).checked; dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; }); save(); history.back(); }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -407,7 +318,10 @@
             if (user) initSession(user);
             else { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
         });
-        setTimeout(() => { const loader = document.getElementById('loading-screen'); if (!loader.classList.contains('hidden')) { loader.classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); } }, 4000);
+        setTimeout(() => {
+            const loader = document.getElementById('loading-screen');
+            if (!loader.classList.contains('hidden')) { loader.classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
+        }, 4000);
     });
 </script>
 
