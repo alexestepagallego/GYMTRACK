@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymTrack | Elite Admin</title>
+    <title>GymTrack | Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { background-color: #0a0a0a; font-family: 'Inter', sans-serif; color: #e0e0e0; margin: 0; overflow-x: hidden; }
         .bg-card { background-color: #141414; }
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         input { background-color: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; outline: none; transition: border 0.3s; }
         input:focus { border-color: #fff; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -47,7 +47,7 @@
         <h1 id="logo-header" class="text-xl font-black tracking-tighter">GYM<span class="text-gray-500 font-normal">TRACK</span></h1>
         
         <div class="flex items-center gap-2">
-            <button id="btn-save-template" onclick="guardarComoPlantilla()" class="hidden bg-green-600/20 text-green-500 p-2 rounded-xl border border-green-600/50 font-black text-[9px] tracking-widest uppercase">💾 GUARDAR PLANTILLA</button>
+            <button id="btn-save-template" onclick="guardarComoPlantilla()" class="hidden bg-green-600/20 text-green-500 p-2 rounded-xl border border-green-600/50 font-black text-[9px] tracking-widest uppercase">💾 PLANTILLA</button>
             <button id="btn-admin-volver" onclick="volverPanelAdmin()" class="hidden bg-yellow-600/20 text-yellow-500 p-2 rounded-xl border border-yellow-600/50 font-black text-[9px] tracking-widest uppercase">👑 PANEL</button>
             
             <button onclick="logout()" class="text-[9px] font-black opacity-50 uppercase border border-white/10 px-3 py-2 rounded-xl active:bg-white/5 transition-all">Salir</button>
@@ -55,10 +55,10 @@
     </header>
 
     <main class="max-w-md mx-auto p-4">
-        <div id="vista-admin" class="hidden fade-in">
+        <div id="vista-admin" class="hidden fade-in pb-20">
             <div class="flex justify-between items-center my-8">
                 <h2 class="text-3xl font-black text-white uppercase italic tracking-tighter leading-none text-yellow-500">Panel Admin</h2>
-                <button onclick="abrirModalCrearUsuario()" class="bg-white text-black text-[10px] px-4 py-2 rounded-full font-black uppercase tracking-widest">+ Nuevo Usuario</button>
+                <button onclick="abrirModalCrearUsuario()" class="bg-white text-black text-[10px] px-4 py-2 rounded-full font-black uppercase tracking-widest">+ Nuevo</button>
             </div>
             <div id="lista-usuarios-admin" class="space-y-3"></div>
         </div>
@@ -78,16 +78,39 @@
 
         <div id="vista-nutricion" class="hidden fade-in">
             <h2 class="text-3xl font-black my-8 text-white uppercase italic tracking-tighter leading-none">Nutrición<br><span class="text-gray-600 text-lg font-normal tracking-normal normal-case">Plan alimenticio</span></h2>
-            
             <div class="bg-card border border-dashed border-white/20 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center mt-10">
                 <span class="text-5xl mb-4 grayscale opacity-50">🍽️</span>
                 <h3 class="text-white font-black uppercase tracking-widest mb-2">Próximamente</h3>
                 <p class="text-gray-500 text-xs">Aquí irá el plan nutricional del cliente. Habla con tu desarrollador para añadir macros, dietas, ingredientes...</p>
             </div>
         </div>
+
+        <div id="vista-peso" class="hidden fade-in">
+            <h2 class="text-3xl font-black my-8 text-white uppercase italic tracking-tighter leading-none">Mi Peso<br><span class="text-gray-600 text-lg font-normal tracking-normal normal-case">Evolución</span></h2>
+            <div class="bg-card p-4 rounded-[2rem] border border-white/5 mb-6 shadow-lg"><canvas id="chartPeso"></canvas></div>
+            <div class="bg-card p-6 rounded-[2rem] border border-white/5 shadow-lg">
+                <p class="text-[10px] uppercase text-gray-500 font-black tracking-widest mb-3 ml-1">Añadir Registro</p>
+                <div class="flex gap-2">
+                    <input type="number" id="input-peso-actual" step="0.1" class="flex-1 text-xl font-bold text-center" placeholder="Kg hoy">
+                    <button onclick="registrarPesoHoy()" class="bg-white text-black px-6 rounded-xl font-black text-xs uppercase">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="vista-ajustes" class="hidden fade-in">
+            <h2 class="text-3xl font-black my-8 text-white uppercase italic tracking-tighter leading-none">Ajustes<br><span class="text-gray-600 text-lg font-normal tracking-normal normal-case">Días de entreno</span></h2>
+            <div class="bg-blue-900/20 border border-blue-900/50 p-4 rounded-2xl mb-6">
+                <p class="text-blue-400 text-xs">Activa o desactiva los días y ponles nombre (Ej: "Día de Pierna" o "Descanso").</p>
+            </div>
+            <div id="lista-edicion-dias" class="space-y-3 mb-8"></div>
+            <button id="btn-guardar-rutina" onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">
+                Guardar Cambios
+            </button>
+        </div>
+
     </main>
 
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 z-40 hidden h-20 px-2 pb-safe">
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 z-40 hidden h-[5.5rem] px-2 pb-safe">
         <div class="max-w-md mx-auto flex justify-between items-center h-full gap-1">
             
             <button onclick="cambiarTab('entreno')" id="tab-entreno" class="flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105">
@@ -97,22 +120,21 @@
             
             <button onclick="cambiarTab('nutricion')" id="tab-nutricion" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
                 <span class="text-2xl mb-1">🍎</span>
-                <span class="text-[9px] font-black uppercase tracking-widest">Nutrición</span>
+                <span class="text-[9px] font-black uppercase tracking-widest">Dieta</span>
             </button>
 
-            <button onclick="abrirPeso()" id="tab-peso" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
+            <button onclick="abrirVistaPeso()" id="tab-peso" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
                 <span class="text-2xl mb-1">📊</span>
                 <span class="text-[9px] font-black uppercase tracking-widest">Peso</span>
             </button>
 
-            <button onclick="abrirEditorRutina()" id="tab-ajustes" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
+            <button onclick="abrirVistaAjustes()" id="tab-ajustes" class="flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100">
                 <span class="text-2xl mb-1">⚙️</span>
                 <span class="text-[9px] font-black uppercase tracking-widest">Ajustes</span>
             </button>
 
         </div>
     </nav>
-
 </div>
 
 <div id="modal-crear-usuario" class="fixed inset-0 z-[140] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
@@ -137,37 +159,8 @@
     </div>
 </div>
 
-<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
-    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
-        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2>
-        <input type="text" id="input-nombre-ejercicio" placeholder="Nombre (Ej: Press Banca)" class="w-full text-center text-lg font-bold mb-4">
-        <p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos (Opcional)</p>
-        <div class="grid grid-cols-3 gap-2 mb-6">
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="text" id="new-target-peso" placeholder="Ej: 80" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="text" id="new-target-reps" placeholder="Ej: 8-12" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Descanso</label><input type="text" id="new-target-rest" placeholder="Ej: 2:30" class="text-center font-bold text-sm"></div>
-        </div>
-        <button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button>
-        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4 text-center">Cancelar</button>
-    </div>
-</div>
-
-<div id="modal-opciones-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center">
-    <div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto">
-        <h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Ejercicio</h2>
-        <input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-4 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]">
-        <p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos (Opcional)</p>
-        <div class="grid grid-cols-3 gap-2 mb-6">
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="text" id="edit-target-peso" placeholder="Ej: 80" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="text" id="edit-target-reps" placeholder="Ej: 8-12" class="text-center font-bold text-sm"></div>
-            <div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Descanso</label><input type="text" id="edit-target-rest" placeholder="Ej: 2:30" class="text-center font-bold text-sm"></div>
-        </div>
-        <button onclick="guardarOpcionesEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Cambios</button>
-        <button onclick="eliminarEjercicio()" class="w-full bg-red-900/80 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Eliminar Ejercicio</button>
-        <button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-2 text-center">Cancelar</button>
-    </div>
-</div>
-
+<div id="modal-nuevo-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Nuevo Ejercicio</h2><input type="text" id="input-nombre-ejercicio" placeholder="Nombre (Ej: Press Banca)" class="w-full text-center text-lg font-bold mb-4"><p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos (Opcional)</p><div class="grid grid-cols-3 gap-2 mb-6"><div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="text" id="new-target-peso" placeholder="Ej: 80" class="text-center font-bold text-sm"></div><div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="text" id="new-target-reps" placeholder="Ej: 8-12" class="text-center font-bold text-sm"></div><div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Descanso</label><input type="text" id="new-target-rest" placeholder="Ej: 2:30" class="text-center font-bold text-sm"></div></div><button onclick="confirmarNuevoEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Crear</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-4 text-center">Cancelar</button></div></div>
+<div id="modal-opciones-ejercicio" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Ejercicio</h2><input type="text" id="edit-nombre-ejercicio" class="w-full text-center text-lg font-bold mb-4 bg-[#1a1a1a] text-white p-3 rounded-xl border border-[#333]"><p class="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-3">Objetivos (Opcional)</p><div class="grid grid-cols-3 gap-2 mb-6"><div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Kg</label><input type="text" id="edit-target-peso" placeholder="Ej: 80" class="text-center font-bold text-sm"></div><div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Reps</label><input type="text" id="edit-target-reps" placeholder="Ej: 8-12" class="text-center font-bold text-sm"></div><div class="flex flex-col"><label class="text-[8px] uppercase text-gray-500 font-black mb-1 ml-1 text-center">Descanso</label><input type="text" id="edit-target-rest" placeholder="Ej: 2:30" class="text-center font-bold text-sm"></div></div><button onclick="guardarOpcionesEjercicio()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Guardar Cambios</button><button onclick="eliminarEjercicio()" class="w-full bg-red-900/80 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest mb-3">Eliminar Ejercicio</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-2 text-center">Cancelar</button></div></div>
 <div id="modal-editar-serie" class="fixed inset-0 z-[120] transform translate-y-full transition-transform duration-500 ease-in-out bg-black/95 backdrop-blur-sm p-6 flex flex-col justify-center"><div class="bg-card p-8 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm mx-auto"><h2 class="text-xl font-black text-white uppercase italic mb-6 text-center">Editar Serie</h2><div class="grid grid-cols-2 gap-4 mb-6"><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Kilos</label><input type="number" id="edit-peso-val" class="text-center font-bold text-xl"></div><div class="flex flex-col"><label class="text-[9px] uppercase text-gray-500 font-black mb-1 ml-1">Repes</label><input type="number" id="edit-reps-val" class="text-center font-bold text-xl"></div></div><button onclick="confirmarEdicionSerie()" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest">Guardar</button><button onclick="history.back()" class="w-full text-gray-500 font-bold uppercase text-[10px] mt-6 text-center">Cancelar</button></div></div>
 
 <div id="exercise-detail" class="fixed inset-0 z-[90] transform translate-y-full transition-transform duration-500 ease-in-out bg-[#0a0a0a] p-6 overflow-y-auto">
@@ -189,8 +182,6 @@
     <div id="historial-agrupado" class="space-y-3 pb-20"></div>
 </div>
 
-<div id="modal-rutina" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic font-black">Rutina</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div id="lista-edicion-dias" class="space-y-3 mb-8"></div><button onclick="guardarConfiguracionRutina()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest mb-12 active:scale-95 transition-transform">Guardar Cambios</button></div>
-<div id="modal-peso" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6 overflow-y-auto"><div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-black text-white uppercase italic">Peso</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full">✕</button></div><div class="bg-card p-4 rounded-[2rem] border border-white/5 mb-6"><canvas id="chartPeso"></canvas></div><div class="bg-card p-6 rounded-[2rem] border border-white/5"><div class="flex gap-2"><input type="number" id="input-peso-actual" step="0.1" class="flex-1 text-xl font-bold text-center" placeholder="Kg hoy"><button onclick="registrarPesoHoy()" class="bg-white text-black px-6 rounded-xl font-black text-xs uppercase">OK</button></div></div></div>
 <div id="modal-grafica-ejercicio" class="fixed inset-0 z-[100] transform translate-y-full transition-transform duration-500 bg-black p-6"><div class="flex justify-between items-center mb-10"><h2 class="text-2xl font-black text-white uppercase italic">Evolución</h2><button onclick="history.back()" class="bg-white/10 text-white w-10 h-10 rounded-full font-bold">✕</button></div><div class="bg-card p-6 rounded-[2.5rem] border border-white/5 shadow-2xl"><canvas id="chartEjercicioIndividual"></canvas></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -219,42 +210,64 @@
     let pesoChart = null, ejercicioChart = null, ejercicioActualId = null, serieAEditarId = null, ejercicioAEditarId = null;
     const IMG_DESCANSO = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200';
 
+    // --- MANEJO DEL BOTÓN ATRÁS DEL MÓVIL ---
     window.onpopstate = function(event) {
-        const modales = ['modal-rutina', 'modal-peso', 'exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie', 'modal-opciones-ejercicio', 'modal-plantillas', 'modal-crear-usuario'];
+        const modales = ['exercise-detail', 'modal-grafica-ejercicio', 'modal-nuevo-ejercicio', 'modal-editar-serie', 'modal-opciones-ejercicio', 'modal-plantillas', 'modal-crear-usuario'];
         modales.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('translate-y-full'); });
+        
         if (!event.state) {
             if(loggedInEmail === ADMIN_EMAIL && currentUserEmail === null) {
                 mostrarPanelAdmin();
             } else {
-                if(document.getElementById('vista-nutricion').classList.contains('hidden')) {
-                    mostrarCategorias();
+                // Si el usuario le da atrás mientras ve los ejercicios de un día, vuelve a la lista de días.
+                if (!document.getElementById('vista-platos').classList.contains('hidden')) {
+                    document.getElementById('vista-platos').classList.add('hidden');
+                    document.getElementById('vista-categorias').classList.remove('hidden');
+                    document.getElementById('btn-atras').classList.add('hidden');
+                    cambiarVisualTab('entreno');
                 }
             }
         }
     };
 
-    // --- LÓGICA TABS INFERIORES ---
-    function cambiarTab(tab) {
-        const tEntreno = document.getElementById('tab-entreno');
-        const tNutricion = document.getElementById('tab-nutricion');
-
-        tEntreno.className = "flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100";
-        tNutricion.className = "flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100";
-
-        if (tab === 'entreno') {
-            tEntreno.className = "flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105";
-            document.getElementById('vista-nutricion').classList.add('hidden');
-            mostrarCategorias(); 
-        } else if (tab === 'nutricion') {
-            tNutricion.className = "flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105";
-            document.getElementById('vista-categorias').classList.add('hidden');
-            document.getElementById('vista-platos').classList.add('hidden');
-            document.getElementById('btn-atras').classList.add('hidden'); 
-            document.getElementById('vista-nutricion').classList.remove('hidden');
-        }
+    // --- LÓGICA DE TABS INFERIORES ---
+    function cambiarVisualTab(tabActiva) {
+        const tabs = ['entreno', 'nutricion', 'peso', 'ajustes'];
+        tabs.forEach(t => {
+            const el = document.getElementById('tab-' + t);
+            if (t === tabActiva) el.className = "flex flex-col items-center justify-center w-full h-full transition-all text-white scale-105";
+            else el.className = "flex flex-col items-center justify-center w-full h-full transition-all text-gray-600 opacity-50 grayscale scale-95 hover:text-white hover:opacity-100";
+        });
     }
 
-    // --- AUTH ---
+    function cambiarTab(tab) {
+        cambiarVisualTab(tab);
+        const vistas = ['vista-categorias', 'vista-nutricion', 'vista-peso', 'vista-ajustes', 'vista-platos'];
+        vistas.forEach(v => document.getElementById(v).classList.add('hidden'));
+        document.getElementById('btn-atras').classList.add('hidden'); 
+
+        if (tab === 'entreno') document.getElementById('vista-categorias').classList.remove('hidden');
+        if (tab === 'nutricion') document.getElementById('vista-nutricion').classList.remove('hidden');
+        if (tab === 'peso') document.getElementById('vista-peso').classList.remove('hidden');
+        if (tab === 'ajustes') document.getElementById('vista-ajustes').classList.remove('hidden');
+    }
+
+    // Funciones wrappers para las tabs de Peso y Ajustes
+    function abrirVistaPeso() {
+        cambiarTab('peso');
+        setTimeout(() => {
+            const ctx = document.getElementById('chartPeso').getContext('2d');
+            if(pesoChart) pesoChart.destroy();
+            pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff', tension: 0.3 }] }, options: { plugins: { legend: { display: false } } } });
+        }, 100);
+    }
+
+    function abrirVistaAjustes() {
+        cambiarTab('ajustes');
+        document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `<div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5"><div class="flex justify-between items-center"><span class="font-black text-white italic text-sm font-black">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div><input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none"></div>`).join('');
+    }
+
+    // --- AUTH Y SESIÓN ---
     function handleAuth() {
         const user = document.getElementById('login-user').value.trim().toLowerCase();
         const pass = document.getElementById('login-pass').value.trim();
@@ -282,6 +295,7 @@
         else { await cargarPerfilUsuario(loggedInEmail); }
     }
 
+    // --- CREAR USUARIO Y PLANTILLAS ADMIN ---
     function abrirModalCrearUsuario() { history.pushState({view:'modal'}, ""); document.getElementById('modal-crear-usuario').classList.remove('translate-y-full'); }
     async function confirmarCrearUsuario() {
         const newUser = document.getElementById('new-user-name').value.trim().toLowerCase();
@@ -356,14 +370,11 @@
     }
 
     function mostrarPanelAdmin() { 
+        const vistas = ['vista-categorias', 'vista-nutricion', 'vista-peso', 'vista-ajustes', 'vista-platos'];
+        vistas.forEach(v => document.getElementById(v).classList.add('hidden'));
         document.getElementById('vista-admin').classList.remove('hidden'); 
-        document.getElementById('vista-categorias').classList.add('hidden'); 
-        document.getElementById('vista-platos').classList.add('hidden'); 
-        document.getElementById('vista-nutricion').classList.add('hidden'); 
-        
         document.getElementById('btn-admin-volver').classList.add('hidden'); 
         document.getElementById('btn-save-template').classList.add('hidden'); 
-        
         document.getElementById('bottom-nav').classList.add('hidden');
     }
 
@@ -388,14 +399,16 @@
             
             document.getElementById('bottom-nav').classList.remove('hidden');
             cambiarTab('entreno');
+            renderDashboard();
         } catch (error) { alert("Error de conexión"); document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('vista-login').classList.remove('hidden'); }
     }
 
     async function save() { if(currentUserEmail) await db.collection('usuarios').doc(currentUserEmail).update(userData); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
+    // --- OPERACIONES DIARIAS ---
     function renderDashboard() { document.getElementById('contenedor-dias').innerHTML = userData.rutina.filter(d => d.activo).map(dia => `<div onclick="verDia('${dia.id}')" class="relative h-28 rounded-2xl overflow-hidden border border-white/5 active:scale-95 transition-all cursor-pointer shadow-lg"><img src="${dia.img}" class="absolute inset-0 w-full h-full object-cover opacity-10"><div class="absolute inset-0 p-5 flex flex-col justify-end"><span class="text-white text-xl font-black uppercase italic">${dia.id}</span><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1">${dia.musculo}</span></div></div>`).join(''); }
-    function verDia(diaId) { history.pushState({ view: 'ejercicios' }, ""); document.getElementById('vista-categorias').classList.add('hidden'); document.getElementById('logo-header').classList.add('hidden'); document.getElementById('vista-platos').classList.remove('hidden'); document.getElementById('btn-atras').classList.remove('hidden'); document.getElementById('titulo-dia').innerText = diaId; actualizarListaEjercicios(); }
+    function verDia(diaId) { history.pushState({ view: 'ejercicios' }, ""); document.getElementById('vista-categorias').classList.add('hidden'); document.getElementById('vista-platos').classList.remove('hidden'); document.getElementById('btn-atras').classList.remove('hidden'); document.getElementById('titulo-dia').innerText = diaId; actualizarListaEjercicios(); }
     
     function actualizarListaEjercicios() { 
         const fil = userData.ejercicios.filter(e => e.dia === document.getElementById('titulo-dia').innerText); 
@@ -410,7 +423,7 @@
     }
 
     function getMax(s) { return s.length ? Math.max(...s.map(x => parseFloat(x.peso))) : '-'; }
-    function mostrarCategorias() { document.getElementById('vista-categorias').classList.remove('hidden'); document.getElementById('logo-header').classList.remove('hidden'); document.getElementById('vista-platos').classList.add('hidden'); document.getElementById('btn-atras').classList.add('hidden'); renderDashboard(); }
+    function mostrarCategorias() { document.getElementById('vista-categorias').classList.remove('hidden'); document.getElementById('vista-platos').classList.add('hidden'); document.getElementById('btn-atras').classList.add('hidden'); renderDashboard(); }
 
     function abrirModalNuevoEjercicio() { history.pushState({view:'modal'}, ""); document.getElementById('input-nombre-ejercicio').value = ""; document.getElementById('new-target-peso').value = ""; document.getElementById('new-target-reps').value = ""; document.getElementById('new-target-rest').value = ""; document.getElementById('modal-nuevo-ejercicio').classList.remove('translate-y-full'); setTimeout(() => document.getElementById('input-nombre-ejercicio').focus(), 300); }
     function confirmarNuevoEjercicio() { const n = document.getElementById('input-nombre-ejercicio').value.trim(); if(!n) return; userData.ejercicios.push({ id: Date.now(), dia: document.getElementById('titulo-dia').innerText, nombre: n, series: [], targetPeso: document.getElementById('new-target-peso').value.trim() || null, targetReps: document.getElementById('new-target-reps').value.trim() || null, targetRest: document.getElementById('new-target-rest').value.trim() || null }); save(); actualizarListaEjercicios(); history.back(); }
@@ -435,10 +448,29 @@
     function addSeriePasada(f) { const p = prompt("Peso ("+f+"):"), r = prompt("Reps:"); if(p && r) { userData.ejercicios.find(ex => ex.id === ejercicioActualId).series.push({ id: Date.now(), peso: p, reps: r, fecha: f }); save(); actualizarHistorial(); actualizarListaEjercicios(); } }
 
     function abrirGraficaEjercicio() { history.pushState({v:'m'}, ""); const e = userData.ejercicios.find(x => x.id === ejercicioActualId); document.getElementById('modal-grafica-ejercicio').classList.remove('translate-y-full'); setTimeout(() => { const ctx = document.getElementById('chartEjercicioIndividual').getContext('2d'); const dataP = e.series.reduce((acc, s) => { const p = parseFloat(s.peso); if (!acc[s.fecha] || p > acc[s.fecha]) acc[s.fecha] = p; return acc; }, {}); if (ejercicioChart) ejercicioChart.destroy(); ejercicioChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(dataP), datasets: [{ data: Object.values(dataP), borderColor: '#fff', tension: 0.4, pointRadius: 5, pointBackgroundColor: '#fff' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { display: false } } } } }); }, 100); }
-    function abrirPeso() { history.pushState({v:'m'}, ""); document.getElementById('modal-peso').classList.remove('translate-y-full'); setTimeout(() => { const ctx = document.getElementById('chartPeso').getContext('2d'); if(pesoChart) pesoChart.destroy(); pesoChart = new Chart(ctx, { type: 'line', data: { labels: userData.historialPeso.map(p => p.fecha), datasets: [{ data: userData.historialPeso.map(p => p.valor), borderColor: '#fff' }] }, options: { plugins: { legend: { display: false } } } }); }, 100); }
-    function registrarPesoHoy() { const p = parseFloat(document.getElementById('input-peso-actual').value); if(!p) return; userData.historialPeso.push({ fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}), valor: p }); save(); abrirPeso(); }
-    function abrirEditorRutina() { history.pushState({v:'m'}, ""); document.getElementById('lista-edicion-dias').innerHTML = userData.rutina.map((dia, index) => `<div class="bg-card p-4 rounded-xl flex flex-col gap-3 border border-white/5"><div class="flex justify-between items-center"><span class="font-black text-white italic text-sm font-black">${dia.id}</span><label class="switch"><input type="checkbox" id="check-${index}" ${dia.activo ? 'checked' : ''}><span class="slider"></span></label></div><input type="text" id="input-name-${index}" value="${dia.musculo}" class="text-xs font-bold bg-black/40 border-none outline-none"></div>`).join(''); document.getElementById('modal-rutina').classList.remove('translate-y-full'); }
-    function guardarConfiguracionRutina() { userData.rutina.forEach((dia, index) => { dia.activo = document.getElementById(`check-${index}`).checked; dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; }); save(); history.back(); }
+    
+    function registrarPesoHoy() { 
+        const p = parseFloat(document.getElementById('input-peso-actual').value); 
+        if(!p) return; 
+        userData.historialPeso.push({ fecha: new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'short'}), valor: p }); 
+        save(); 
+        abrirVistaPeso(); // Recargar gráfica
+    }
+    
+    function guardarConfiguracionRutina() { 
+        userData.rutina.forEach((dia, index) => { dia.activo = document.getElementById(`check-${index}`).checked; dia.musculo = document.getElementById(`input-name-${index}`).value || 'Descanso'; }); 
+        save(); 
+        
+        // Efecto visual de guardado en el botón
+        const btn = document.getElementById('btn-guardar-rutina');
+        const oldText = btn.innerText;
+        btn.innerText = "¡Guardado!";
+        btn.classList.add('bg-green-500', 'text-black');
+        setTimeout(() => {
+            btn.innerText = oldText;
+            btn.classList.remove('bg-green-500', 'text-black');
+        }, 1500);
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
         auth.onAuthStateChanged(user => {
